@@ -54,6 +54,7 @@ function parseColumns(body) {
     .map((m) => `${m[1]} ${m[2].replace(/\s+/g, '')}`.toLowerCase());
 }
 
+/** @param {string} text @param {{ model?: string }} [opts] */
 export function parseSql(text, { model } = {}) {
   const reads = new Set();
   const writes = new Set();

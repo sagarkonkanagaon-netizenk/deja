@@ -11,7 +11,7 @@ export function dejaHome() {
   return process.env.DEJA_HOME || join(homedir(), '.deja');
 }
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 3;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS anchors (
   memory_id INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
   path TEXT NOT NULL,
   hash TEXT,
+  mtime INTEGER,
+  size INTEGER,
   PRIMARY KEY (memory_id, path)
 );
 CREATE INDEX IF NOT EXISTS anchors_path ON anchors(path);
@@ -90,6 +92,17 @@ CREATE TABLE IF NOT EXISTS touches (
 );
 CREATE INDEX IF NOT EXISTS touches_session ON touches(session_id, at);
 
+-- The repo's playbook: commands that have actually worked here, by family.
+CREATE TABLE IF NOT EXISTS commands (
+  project TEXT NOT NULL,
+  family TEXT NOT NULL,
+  command TEXT NOT NULL,
+  ok INTEGER NOT NULL DEFAULT 0,
+  fail INTEGER NOT NULL DEFAULT 0,
+  last_ok INTEGER,
+  PRIMARY KEY (project, family)
+);
+
 -- Data lineage: datasets, their columns, and the files that read and write them.
 CREATE TABLE IF NOT EXISTS datasets (
   project TEXT NOT NULL,
@@ -111,6 +124,22 @@ CREATE TABLE IF NOT EXISTS edges (
 CREATE INDEX IF NOT EXISTS edges_dst ON edges(project, dst);
 `;
 
+// Upgrades for databases created by older versions; fresh databases get SCHEMA.
+/** @type {Array<[number, string]>} */
+const MIGRATIONS = [
+  [2, 'ALTER TABLE anchors ADD COLUMN mtime INTEGER; ALTER TABLE anchors ADD COLUMN size INTEGER;'],
+  [3, `-- The repo's playbook: commands that have actually worked here, by family.
+CREATE TABLE IF NOT EXISTS commands (
+  project TEXT NOT NULL,
+  family TEXT NOT NULL,
+  command TEXT NOT NULL,
+  ok INTEGER NOT NULL DEFAULT 0,
+  fail INTEGER NOT NULL DEFAULT 0,
+  last_ok INTEGER,
+  PRIMARY KEY (project, family)
+);`],
+];
+
 let cached;
 
 export function openDb(path = process.env.DEJA_DB || join(dejaHome(), 'deja.db')) {
@@ -118,10 +147,13 @@ export function openDb(path = process.env.DEJA_DB || join(dejaHome(), 'deja.db')
   if (path !== ':memory:') mkdirSync(join(path, '..'), { recursive: true });
   const db = new DatabaseSync(path);
   db.exec('PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 3000; PRAGMA foreign_keys = ON; PRAGMA synchronous = NORMAL;');
-  const { user_version } = db.prepare('PRAGMA user_version').get();
+  const user_version = Number(db.prepare('PRAGMA user_version').get().user_version);
   if (user_version < SCHEMA_VERSION) {
-    db.exec(SCHEMA);
-    db.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+    tx(db, () => {
+      if (user_version === 0) db.exec(SCHEMA);
+      else for (const [v, sql] of MIGRATIONS) if (user_version < v) db.exec(sql);
+      db.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+    });
   }
   cached = { path, db };
   return db;

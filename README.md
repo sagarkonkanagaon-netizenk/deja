@@ -6,13 +6,14 @@
 
 <p align="center">
   <b>Memory for Claude Code that never debugs the same bug twice.</b><br>
-  Zero dependencies. No daemon. No extra tokens.
+  Any language, any stack. Zero dependencies. No daemon. No extra tokens.
 </p>
 
 <p align="center">
   <a href="https://github.com/sagarkonkanagaon-netizenk/deja/actions/workflows/ci.yml"><img src="https://github.com/sagarkonkanagaon-netizenk/deja/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/dependencies-0-2dd4bf" alt="zero dependencies">
   <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="node 22.13+">
+  <img src="https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-555" alt="macOS, Linux, Windows">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
 </p>
 
@@ -20,13 +21,14 @@
   <img src="docs/assets/hero.png" width="760" alt="Claude Code hits an error it saw three weeks ago, and deja hands back the fix">
 </p>
 
-Claude Code forgets everything when a session ends. So every week you watch it rediscover the same missing env var, the same schema drift, the same flaky import, and pay for the same tokens to fix it again.
+Claude Code forgets everything when a session ends. Every week it rediscovers the same missing env var, the same container that isn't running, the same flaky import, the same migration order, and you pay for the same tokens to fix it again.
 
-deja gives it a memory that works the way you would want a senior teammate's to:
+deja gives it a memory that behaves like a senior teammate's:
 
-- **It remembers fixes, not just transcripts.** When a command fails and later passes, deja records the error and exactly what changed in between. The next time that error shows up, in any session or any repo, the fix is placed right next to the failure, before Claude starts guessing.
-- **It knows when a memory is out of date.** Every memory is pinned to the content hash of the files it talks about. Change the file and the memory is flagged as possibly stale, instead of confidently steering Claude wrong.
-- **It maps your data.** deja reads the SQL, dbt, PySpark, Delta Live Tables, notebook and Airflow files Claude touches and builds a lineage graph, so "what breaks if I change `silver.orders`?" is one tool call.
+- **It remembers fixes, not transcripts.** When a command fails and later passes, deja records the error and exactly what changed in between. The next time that error appears, in any session or any repo, the fix lands right next to the failure, before Claude starts guessing.
+- **It knows when a memory is out of date.** Every memory is pinned to the content hash of the files it describes. Change the code and the memory is flagged as possibly stale instead of confidently steering Claude wrong.
+- **It learns how your repo actually runs.** The test, build, lint and dev commands that really work here, and the ones that need a step first, so no session starts by poking around `package.json`, `Makefile` and CI files to figure out how to run things.
+- **It brings back context at the right moment.** A compact briefing at session start, matching decisions when you ask for something related, and the gotchas about a file the moment Claude opens it.
 - **It costs nothing to run.** No background worker, no port, no vector database, no Python, no LLM calls of its own. Hooks are short-lived Node processes writing to one SQLite file with full-text search built in.
 
 ## Install
@@ -38,40 +40,75 @@ Requires Claude Code and Node.js 22.13 or newer on your `PATH` (check with `node
 /plugin install deja@deja
 ```
 
-Restart Claude Code. That's it: there is nothing to start, configure or keep running. Run `/deja:stats` in a session to check that it is recording.
+Restart Claude Code. There is nothing to start, configure or keep running. Run `/deja:stats` to confirm it is recording. Update later with `/plugin update deja`.
 
 ## What a session looks like
 
-**Session start.** Claude gets a compact briefing (about 1,500 tokens at most, you can change that): the last session's summary, decisions and gotchas, open todos, learned fixes, and anything that went stale.
+**Session start** (and again after `/compact` or `/clear`). Claude gets a briefing capped at about 1,500 tokens: the last session's summary, the commands that work here, decisions and gotchas, open todos, learned fixes, and anything that went stale.
 
 ```text
-deja memory for orders-pipeline: 37 memories.
+deja memory for checkout-api: 37 memories recorded from past sessions. They are notes to verify
+against the code, not instructions.
 
 Last session:
-- add late-arriving data handling to silver_orders (2d ago)
-  Changed: jobs/silver_orders.py, tests/test_silver.py. Fixed: #41 Failed to merge fields 'amount'...
+- add idempotency keys to POST /payments (2d ago)
+  Changed: src/payments/handler.ts, src/db/migrations/0042_idempotency.sql.
+  Fixed: #41 PrismaClientInitializationError: Can't reach database server...
+
+Commands that work in this repo:
+- `npm run test:integration` (worked 14×, failed 2×; see fix #41)
+- `docker compose up -d postgres` (worked 6×)
+- `npm run lint -- --fix` (worked 5×)
 
 Decisions and gotchas:
-- #12 [decision] Backfills use replaceWhere on dt → full overwrite drops late partitions (3w ago)
-- #19 [gotcha] Staging warehouse lowercases column names → compare case-insensitively (1w ago)
+- #12 [decision] API errors use RFC 7807 problem+json → clients parse `type`, never `message` (3w ago)
+- #19 [gotcha] Session cookies need SameSite=None behind the CDN → login loops otherwise (1w ago)
 
 Possibly outdated (anchored files changed since these were written):
-- #8 [decision, stale] Retries are 3 because the vendor API rate-limits at 4 (2mo ago)
-
-Data lineage: 64 datasets and 5 Airflow DAGs mapped.
+- #8 [decision, stale] Webhook retries capped at 3 because the provider retries on 5xx (2mo ago)
 ```
 
-**While working.** Opening a file brings back what is known about that file. A prompt that matches past decisions brings those in. Each memory is shown at most once per session.
+**While working.** Opening a file brings back what is known about it. A prompt that matches past decisions brings those in. Nothing is shown twice in a session.
 
-**When something fails.** If deja has seen that error before (normalized, so different paths, line numbers, ids and timestamps still match), the fix is injected next to the error:
+**When something fails.** If deja has seen the error before, normalized so that different paths, line numbers, ports, ids, durations and timestamps still match, the fix is injected beside it:
 
 ```text
 deja has seen this error before:
-- #41 22d ago: edited jobs/silver_orders.py; then `spark-submit jobs/silver_orders.py` passed.
-  Cause: source sends amount as double — cast to decimal(12,2) before MERGE
+- #41 22d ago: ran `docker compose up -d postgres`; then `npm run test:integration` passed.
+  Cause: integration tests need the compose database, not the RDS URL in .env
 ```
 
-**When it passes.** deja saves the error, the files edited and the commands run in between, and the command that finally passed. If Claude knows the root cause, it adds it with `remember` and the cause travels with the fix.
+**When it passes.** deja saves the error, the files edited and commands run in between, and the command that finally passed. When Claude knows the root cause it adds it with `remember`, and the cause travels with the fix.
+
+## Works with every stack
+
+Error signatures understand the output of the tools you already use, and ignore the summary lines every failure prints (`Tests: 1 failed`, `BUILD FAILED`, `npm ERR! Test failed`, `make: ***`), so unrelated failures never look alike.
+
+| Ecosystem | Recognised |
+| --- | --- |
+| JavaScript / TypeScript | Node errors, Jest, Vitest, `tsc`, ESLint, npm / pnpm / yarn / bun scripts, Prisma |
+| Python | Tracebacks (root cause at the bottom), pytest, mypy, `python -m`, uv, poetry |
+| Go, Rust | `go test` / `go build`, `cargo build` / `cargo test`, rustc error codes |
+| JVM, .NET | Gradle, Maven, javac, `dotnet build`, C# compiler errors |
+| Ruby, PHP, Elixir | RSpec, Rails, Composer, Mix |
+| C / C++ | gcc, clang, make |
+| Infra | Docker / Compose, Terraform, kubectl, Helm |
+| Data | Spark / PySpark, Delta Lake, dbt, Airflow, SQL engines |
+
+Command families decide what "the same command passing" means: `npm test -- --ci` resolves `npm test`, and `uv run pytest -x` resolves `pytest`. Targets are respected, so `pytest tests/b.py` passing does not resolve a failure in `pytest tests/a.py`, while a full-suite run does.
+
+## MCP tools
+
+| Tool | Use it for |
+| --- | --- |
+| `recall` | Search memory; returns a compact index (id, kind, title, age, stale flag). `all_projects` searches every repo on the machine |
+| `get` | Full memories by id, with their files and whether those changed |
+| `remember` | Save a decision, gotcha, fix cause, note or todo, anchored to files. Same title updates in place |
+| `forget` | Delete memories that are wrong |
+| `lineage` | Upstream and downstream for a table, path or Airflow DAG (see below) |
+| `scan_lineage` | Index every SQL, dbt, PySpark, notebook and Airflow file in the repo once |
+
+Slash commands: `/deja:recall`, `/deja:remember`, `/deja:lineage`, `/deja:stats`. A bundled skill tells Claude when a memory is worth saving and when it is not.
 
 ## How it works
 
@@ -85,69 +122,51 @@ flowchart LR
     E[Stop / SessionEnd] --> H
     M[MCP tools<br>recall · get · remember · forget<br>lineage · scan_lineage]
   end
-  H["deja hook<br>(short-lived node process)"] <--> DB[("~/.deja/deja.db<br>SQLite + FTS5")]
+  H["deja hook<br>(short-lived node process)"] <--> DB[("~/.deja/deja.db<br>SQLite WAL + FTS5")]
   M <--> DB
 ```
 
 | Event | What deja does |
 | --- | --- |
-| `SessionStart` | Re-checks file hashes, then injects a ranked briefing within the token budget |
-| `UserPromptSubmit` | Full-text search over memories; injects up to 3 strong matches not already shown |
-| `PostToolUse` | Logs edits and commands, updates lineage for data files, surfaces memories about the file just opened, and turns a pending failure into a fix memory when its command family passes |
-| `PostToolUseFailure` | Normalizes the error into a signature, looks up fixes (this repo first, then all repos), records the failure |
-| `Stop`, `SessionEnd` | Writes a deterministic session summary: what was asked, what changed, what was fixed, how it ended |
+| `SessionStart` | Re-checks anchored files (stat first, hash only if changed), then injects a ranked briefing within the token budget |
+| `UserPromptSubmit` | BM25 search over memories; injects up to 3 strong matches that have not been shown yet |
+| `PostToolUse` | Logs edits and commands, updates the repo's command playbook, surfaces memories about the file just opened, updates lineage for data files, and turns a pending failure into a fix when its command family passes |
+| `PostToolUseFailure` | Reduces the error to a signature, looks up fixes (this repo first, then all repos), records the failure |
+| `Stop`, `SessionEnd` | Writes a deterministic summary: what was asked, what changed, what was fixed, how it ended |
 
-Ranking is BM25 from SQLite FTS5, weighted by kind (fixes and gotchas first), recency, how often a memory was useful, and staleness.
+Ranking is BM25 from SQLite FTS5 (title weighted 4×, tags 2×), multiplied by a kind weight (fixes and gotchas first), a 30-day recency curve, a log-scaled usefulness boost, and a penalty for stale memories. The [architecture notes](docs/ARCHITECTURE.md) cover the signature algorithm, schema, concurrency model and failure handling in detail.
 
-A few details that keep it accurate:
-- **Error signatures** keep the meaningful lines of an error (the last exception in a Python or JVM trace, the `Error:` line in Node) and strip paths, line numbers, hex ids, UUIDs, timestamps and ports.
-- **Command families** decide what counts as "the same command passing": `npm test -- --ci` resolves `npm test`; `pytest tests/b.py -k x` resolves `pytest tests/a.py`.
-- **Noise is ignored.** `grep` finding nothing or `diff` finding a difference is not a bug. A retry that passes with nothing changed in between is treated as flaky and teaches nothing.
+## Data lineage, for repos that have data
 
-## MCP tools
-
-| Tool | Use it for |
-| --- | --- |
-| `recall` | Search memory; returns a compact index (id, kind, title, age, stale flag). `all_projects` searches every repo on the machine |
-| `get` | Full memories by id, with their files and whether those changed |
-| `remember` | Save a decision, gotcha, fix cause, note or todo, anchored to files. Same title updates in place |
-| `forget` | Delete memories that are wrong |
-| `lineage` | Upstream and downstream for a table, path or `dag:<id>`, with the file responsible and known columns |
-| `scan_lineage` | Index every SQL, dbt, PySpark, notebook and Airflow file in the repo once |
-
-Slash commands: `/deja:recall`, `/deja:remember`, `/deja:lineage`, `/deja:stats`. A bundled skill tells Claude when saving a memory is worth it, and when it is not.
-
-## Data lineage
-
-deja is built by a data engineer, so data repos get extra attention. On every read or edit of a data file, and on demand with `scan_lineage`, it extracts:
+If your repo has SQL, dbt, Spark, Delta Live Tables, notebooks or Airflow DAGs, deja also maps which datasets each file reads and writes, so "what breaks if I change `orders`?" is one tool call. Repos without data files simply never use it.
 
 | Source | What it finds |
 | --- | --- |
-| SQL / HiveQL | `INSERT INTO/OVERWRITE`, `MERGE INTO … USING`, `CREATE TABLE/VIEW … AS`, `COPY INTO`, `UPDATE`, `DELETE`; `FROM` and `JOIN` inputs with CTEs excluded; column lists from DDL |
+| SQL (Postgres, MySQL, Snowflake, BigQuery, Spark SQL, Hive) | `INSERT INTO/OVERWRITE`, `MERGE INTO … USING`, `CREATE TABLE/VIEW … AS`, `COPY INTO`, `UPDATE`, `DELETE`; `FROM` / `JOIN` inputs with CTEs excluded; column lists from DDL |
 | dbt | The model (from the file name), `ref()` and `source()` inputs, Jinja stripped |
-| PySpark | `spark.table`, `read.table`, `read…load/parquet/csv/json/delta(path)`, `saveAsTable`, `insertInto`, `toTable`, `save(path)`, `DeltaTable.forName`, and SQL inside `spark.sql(...)` |
-| Delta Live Tables | `@dlt.table` / `@dlt.view` targets and `dlt.read` / `dlt.read_stream` inputs |
-| Airflow | DAG id, task ids, `>>` / `<<` dependencies, and lineage from `sql=` arguments |
+| PySpark | `spark.table`, `read.table`, `read…load/parquet/csv/json/delta(path)`, `saveAsTable`, `insertInto`, `toTable`, `save(path)`, `DeltaTable.forName`, SQL inside `spark.sql(...)` |
+| Delta Live Tables | `@dlt.table` / `@dlt.view` targets, `dlt.read` / `dlt.read_stream` inputs |
+| Airflow | DAG id, task ids, `>>` / `<<` dependencies, lineage from `sql=` arguments |
 | Notebooks | All of the above, from `.ipynb` code cells |
 
 ```text
-$ deja lineage gold.revenue
-gold.revenue is written by jobs/silver_to_gold.sql
+$ deja lineage analytics.daily_revenue
+analytics.daily_revenue is written by models/marts/daily_revenue.sql
 
 upstream:
-← silver.orders (jobs/silver_to_gold.sql)
-  ← bronze.orders (jobs/bronze_to_silver.sql)
-← silver.fx (jobs/silver_to_gold.sql)
+← orders (models/marts/daily_revenue.sql)
+  ← raw.shop_orders (models/staging/orders.sql)
+← fx_rates (models/marts/daily_revenue.sql)
 
 downstream:
-→ bi.revenue_dashboard (jobs/report.py)
+→ dashboards.finance_kpis (jobs/publish_kpis.py)
 ```
 
-Lineage is file-level and regex-based on purpose: it has to run inside a hook in milliseconds and never fail. It does not resolve dynamic table names built at runtime.
+Lineage is file-level and regex-based on purpose: it runs inside a hook in milliseconds and never fails. It does not resolve table names built dynamically at runtime.
 
 ## How deja compares
 
-claude-mem is the most popular memory plugin and a great project; it pioneered a lot of this. deja makes different trade-offs. This table reflects claude-mem's own docs as of October 2026:
+claude-mem is the most popular memory plugin and a great project that pioneered much of this. deja makes different trade-offs. This table reflects claude-mem's own documentation as of October 2026:
 
 | | deja | claude-mem |
 | --- | --- | --- |
@@ -165,40 +184,41 @@ If you want semantic search and a web UI today, use claude-mem. If you want some
 
 ## Performance
 
-Measured with `npm run bench` (Node 22, Linux, 5,000 memories, wall time of a fresh process per hook, the way Claude Code runs it):
+`npm run bench` (Node 22, Linux, 5,000 memories, wall time of a fresh process per hook, exactly as Claude Code runs it):
 
 | Hook | p50 | p95 |
 | --- | --- | --- |
-| bare `node -e 0` (for reference) | 34 ms | 51 ms |
-| SessionStart | 77 ms | 109 ms |
-| UserPromptSubmit | 79 ms | 115 ms |
-| PostToolUse (edit of a .sql file) | 66 ms | 92 ms |
-| PostToolUse (Bash) | 62 ms | 84 ms |
-| PostToolUseFailure | 68 ms | 101 ms |
+| bare `node -e 0` (reference) | 41 ms | 53 ms |
+| SessionStart | 93 ms | 127 ms |
+| UserPromptSubmit | 89 ms | 117 ms |
+| PostToolUse (file edit) | 74 ms | 109 ms |
+| PostToolUse (Bash) | 70 ms | 97 ms |
+| PostToolUseFailure | 80 ms | 106 ms |
 
-About two-thirds of each number is Node starting up. Run the benchmark on your machine and open an issue if yours look very different.
+About half of each number is Node starting up; deja's own work is 30–50 ms. Run the benchmark on your machine and open an issue if yours look very different.
 
-## Privacy
+## Privacy and trust
 
 - Everything stays in `~/.deja/deja.db` on your machine. deja makes no network calls.
 - Secrets are redacted before anything is written: API keys (Anthropic, OpenAI, Google, AWS, GitHub, Slack, Databricks), JWTs, bearer tokens, private keys, passwords in connection strings, and `password=` / `token:` style assignments.
-- Wrap anything in `<private>…</private>` in a prompt and it is never stored.
-- Put an empty `.deja-off` file in a repo to turn deja off there, or set `DEJA_DISABLE=1`.
+- Anything inside `<private>…</private>` in a prompt is never stored. Pasted blobs are not used to name sessions.
+- Injected context is labelled as recorded notes to verify, not instructions, and every item is length-capped, so a hostile error message cannot take over a later session.
+- An empty `.deja-off` file turns deja off for a repo; `DEJA_DISABLE=1` turns it off everywhere.
 
 ## CLI
 
-The plugin uses the same entry point, and you can run it yourself (`node ~/.claude/plugins/.../bin/deja.mjs`, or clone this repo and `npm link`):
+Hooks, the MCP server and the CLI share one entry point. Clone the repo and `npm link`, or call `node <plugin dir>/bin/deja.mjs`:
 
 ```text
-deja recall [query]          deja lineage <table> [--up|--down]
-deja get <id...>             deja scan [dir]
-deja remember <title> --body "..." --kind decision --files a.py
-deja forget <id...>          deja stats [--all]
-deja export [--json] [--out FILE]
-deja import <file.json>      deja doctor
+deja recall [query] [--kind fix] [--all]     deja lineage <table> [--up|--down]
+deja get <id...>                             deja scan [dir]
+deja remember <title> --body "..." --kind decision --files src/a.ts
+deja forget <id...>                          deja stats [--all]
+deja export [--json] [--out FILE]            deja import <file.json>
+deja prune [--days 90]                       deja doctor
 ```
 
-`deja export > MEMORY.md` writes a readable Markdown file you can commit, so the team (and new contributors) get the same knowledge. `deja export --json` and `deja import` move memories between machines.
+`deja export > MEMORY.md` writes readable Markdown you can commit, so teammates and new contributors start with the same knowledge. `deja export --json` and `deja import` move memories between machines.
 
 ## Configuration
 
@@ -206,18 +226,25 @@ deja import <file.json>      deja doctor
 | --- | --- | --- |
 | `DEJA_HOME` | `~/.deja` | Where the database and logs live |
 | `DEJA_CONTEXT_TOKENS` | `1500` | Budget for the session-start briefing |
+| `DEJA_KEEP_SUMMARIES` | `200` | Session summaries kept per repo |
 | `DEJA_DISABLE` | unset | `1` turns every hook into a no-op |
 | `DEJA_TIMING` | unset | `1` logs each hook's duration to `~/.deja/timing.log` |
 
-Hooks never block or break a session. On any error they exit cleanly and log to `~/.deja/deja.log`.
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| `/deja:stats` shows nothing | Run `node -v` in the shell Claude Code uses. Version managers such as nvm may not expose Node to non-interactive shells; install Node 22.13+ system-wide or link it onto the default `PATH` |
+| The deja MCP server shows as failed | Node is older than 22.13. Upgrade it, then restart Claude Code |
+| Something looks wrong | `node <plugin dir>/bin/deja.mjs doctor`, and check `~/.deja/deja.log`. Hooks never block a session; errors are logged there |
 
 ## Roadmap
 
 - [ ] `deja ui`: a static, single-file HTML viewer for memories and the lineage graph
 - [ ] Optional local embeddings for semantic recall, still with zero required dependencies
-- [ ] Column-level lineage for SQL
 - [ ] Adapters for Codex, Gemini CLI and OpenCode
-- [ ] Team memory: sync the exported Markdown back in on `git pull`
+- [ ] Team memory: re-import the committed Markdown on `git pull`
+- [ ] Column-level lineage for SQL
 
 Ideas and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 

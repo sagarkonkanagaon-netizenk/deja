@@ -109,3 +109,74 @@ test('MCP server speaks JSON-RPC and its tools work', () => {
   assert.equal(handle({ jsonrpc: '2.0', method: 'notifications/initialized' }), null);
   assert.equal(handle({ jsonrpc: '2.0', id: 9, method: 'nope' }).error.code, -32601);
 });
+
+test('a passing run of a different test target does not count as the fix', () => {
+  const cwd = repo();
+  failure(fail(cwd, 't1', 'pytest tests/test_a.py', 'E   KeyError: \'customer_id\''));
+  postToolUse({ cwd, session_id: 't1', tool_name: 'Edit', tool_input: { file_path: `${cwd}/src/x.py` } });
+  assert.equal(ctx(postToolUse(bash(cwd, 't1', 'pytest tests/test_b.py'))), '');
+  assert.match(ctx(postToolUse(bash(cwd, 't1', 'pytest tests/test_a.py -q'))), /saved fix memory/);
+});
+
+test('after /compact the briefing and file memories can be shown again', () => {
+  const cwd = repo({ 'api/auth.ts': 'x' });
+  addMemory({ project: cwd, kind: 'gotcha', title: 'Session cookies need SameSite=None behind the proxy', files: ['api/auth.ts'] });
+  const read = () => ctx(postToolUse({ cwd, session_id: 'k1', tool_name: 'Read', tool_input: { file_path: `${cwd}/api/auth.ts` } }));
+  sessionStart({ cwd, session_id: 'k1', source: 'startup' });
+  assert.equal(read(), '', 'already in the startup briefing');
+  assert.match(ctx(sessionStart({ cwd, session_id: 'k1', source: 'compact' })), /SameSite=None/);
+});
+
+test('slash commands and pasted blobs do not name the session', () => {
+  const cwd = repo({ 'a.js': '' });
+  userPromptSubmit({ cwd, session_id: 'n1', prompt: '/deja:stats' });
+  userPromptSubmit({ cwd, session_id: 'n1', prompt: 'refactor the rate limiter <pasted_content id="x">\nhuge log\n</pasted_content id="x">' });
+  postToolUse({ cwd, session_id: 'n1', tool_name: 'Edit', tool_input: { file_path: `${cwd}/a.js` } });
+  sessionEnd({ cwd, session_id: 'n1' });
+  const [s] = search({ project: cwd, kind: 'summary' });
+  assert.equal(s.title, 'refactor the rate limiter');
+});
+
+test('git worktrees share the main repository\'s memory', async () => {
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { projectRoot } = await import('../src/util.mjs');
+  const main = repo();
+  mkdirSync(join(main, '.git', 'worktrees', 'feature'), { recursive: true });
+  const wt = repo();
+  const { rmSync } = await import('node:fs');
+  rmSync(join(wt, '.git'), { recursive: true });
+  writeFileSync(join(wt, '.git'), `gitdir: ${join(main, '.git', 'worktrees', 'feature')}\n`);
+  assert.equal(projectRoot(join(wt)), main);
+});
+
+test('the briefing lists the commands that work in this repo', () => {
+  const cwd = repo();
+  for (let i = 0; i < 3; i++) postToolUse(bash(cwd, 'w1', 'npm run test:integration'));
+  postToolUse(bash(cwd, 'w1', 'docker compose up -d postgres'));
+  postToolUse(bash(cwd, 'w1', 'docker compose up -d postgres'));
+  for (let i = 0; i < 5; i++) postToolUse(bash(cwd, 'w1', 'git status'));
+  postToolUse(bash(cwd, 'w1', 'cat README.md'));
+  failure(fail(cwd, 'w1', 'npm run test:integration', "PrismaClientInitializationError: Can't reach database server at `localhost`:`5432`"));
+  const out = ctx(sessionStart({ cwd, session_id: 'w2' }));
+  assert.match(out, /Commands that work in this repo:\n- `npm run test:integration` \(worked 3×, failed 1×\)\n- `docker compose up -d postgres` \(worked 2×\)/);
+  assert.doesNotMatch(out, /git status|cat README/);
+});
+
+test('the playbook stores the command, not how Claude watched its output', async () => {
+  const { coreCommand } = await import('../src/hooks.mjs');
+  assert.equal(coreCommand('npm test 2>&1 | tail -20'), 'npm test');
+  assert.equal(coreCommand('pytest -x 2>&1 | grep -E "passed|failed"'), 'pytest -x');
+  assert.equal(coreCommand('make build && echo done'), 'make build');
+  assert.equal(coreCommand('docker compose up -d postgres'), 'docker compose up -d postgres');
+});
+
+test('a session resumed in another repo starts fresh there', () => {
+  const a = repo({ 'x.js': '' });
+  const b = repo({ 'y.js': '' });
+  userPromptSubmit({ cwd: a, session_id: 'mv', prompt: 'fix the login redirect loop' });
+  userPromptSubmit({ cwd: b, session_id: 'mv', prompt: 'add pagination to the orders endpoint' });
+  postToolUse({ cwd: b, session_id: 'mv', tool_name: 'Edit', tool_input: { file_path: `${b}/y.js` } });
+  sessionEnd({ cwd: b, session_id: 'mv' });
+  assert.equal(search({ project: b, kind: 'summary' })[0].title, 'add pagination to the orders endpoint');
+});

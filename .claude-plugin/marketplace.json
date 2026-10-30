@@ -1,12 +1,15 @@
 {
   "name": "deja",
   "description": "deja: memory for Claude Code",
-  "owner": { "name": "Sagar", "url": "https://github.com/sagarkonkanagaon-netizenk" },
+  "owner": {
+    "name": "Sagar",
+    "url": "https://github.com/sagarkonkanagaon-netizenk"
+  },
   "plugins": [
     {
       "name": "deja",
       "source": "./",
-      "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens."
+      "description": "Memory for Claude Code that never debugs the same bug twice. Any stack. Zero dependencies, no daemon, no extra tokens."
     }
   ]
 }
