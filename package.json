@@ -1,6 +1,6 @@
 {
   "name": "deja-memory",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.",
   "type": "module",
   "bin": {
@@ -13,7 +13,9 @@
     "commands",
     "skills",
     ".claude-plugin",
-    ".mcp.json"
+    ".codex-plugin",
+    ".mcp.json",
+    ".codex-mcp.json"
   ],
   "engines": {
     "node": ">=22.13"
@@ -26,6 +28,8 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
+    "codex-plugin",
     "memory",
     "persistent-memory",
     "mcp",

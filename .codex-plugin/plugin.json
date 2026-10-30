@@ -1,0 +1,13 @@
+{
+  "name": "deja",
+  "version": "0.4.0",
+  "description": "Memory for coding agents that never debugs the same bug twice. Recalls the fix the moment an error repeats, flags memories when the code they describe changes, and learns the commands that actually work in each repo. Zero dependencies, no daemon, no extra tokens.",
+  "author": { "name": "Sagar", "url": "https://github.com/sagarkonkanagaon-netizenk" },
+  "homepage": "https://github.com/sagarkonkanagaon-netizenk/deja",
+  "repository": "https://github.com/sagarkonkanagaon-netizenk/deja",
+  "license": "MIT",
+  "keywords": ["memory", "codex", "mcp", "sqlite", "debugging", "developer-tools"],
+  "skills": "./skills/",
+  "mcpServers": "./.codex-mcp.json",
+  "hooks": "./hooks/codex-hooks.json"
+}

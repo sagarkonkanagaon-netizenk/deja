@@ -13,7 +13,18 @@ function recentAutoFix(project) {
     .get(project, Date.now() - 2 * 3_600_000);
 }
 
-const project = () => projectRoot(process.env.CLAUDE_PROJECT_DIR || process.cwd());
+const PLUGIN_DIR = resolve(import.meta.dirname, '..');
+
+// Claude Code says which project this is. Codex starts plugin MCP servers inside the
+// plugin's own folder, so fall back to the shell's PWD, then to the newest session.
+export function project() {
+  if (process.env.CLAUDE_PROJECT_DIR) return projectRoot(process.env.CLAUDE_PROJECT_DIR);
+  const here = projectRoot(process.cwd());
+  if (here !== projectRoot(PLUGIN_DIR)) return here;
+  const pwd = process.env.PWD && resolve(process.env.PWD);
+  if (pwd && projectRoot(pwd) !== here) return projectRoot(pwd);
+  return openDb().prepare('SELECT project FROM sessions ORDER BY started_at DESC LIMIT 1').get()?.project || here;
+}
 
 const TOOLS = [
   {

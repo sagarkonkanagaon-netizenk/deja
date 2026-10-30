@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "deja": {
+      "cwd": ".",
+      "command": "node",
+      "args": ["./bin/deja.mjs", "mcp"]
+    }
+  }
+}

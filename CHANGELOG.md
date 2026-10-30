@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+**New: OpenAI Codex support**
+- deja installs as a Codex plugin (`codex plugin marketplace add sagarkonkanagaon-netizenk/deja`, then `codex plugin add deja@deja`) with its hooks, MCP tools and skill.
+- Codex and Claude Code share one memory: a fix learned in one comes back in the other.
+- Hooks understand Codex payloads: files changed through `apply_patch`, and failed shell commands reported as `Exit code: N` text or an `exit_code` field on `PostToolUse`.
+- The MCP server finds the user's project when an agent starts it inside the plugin folder, as Codex does.
+
 ## 0.3.0
 
 **New: `deja ui`**

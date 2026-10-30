@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ctx, repo, write } from './helpers.mjs';
-import { failure, postToolUse, sessionEnd, sessionStart, stop, userPromptSubmit } from '../src/hooks.mjs';
+import { fileURLToPath } from 'node:url';
+import { exitOf, failure, patchFiles, postToolUse, sessionEnd, sessionStart, stop, userPromptSubmit } from '../src/hooks.mjs';
 import { addMemory, search } from '../src/store.mjs';
 import { handle } from '../src/mcp.mjs';
 
@@ -179,4 +180,50 @@ test('a session resumed in another repo starts fresh there', () => {
   postToolUse({ cwd: b, session_id: 'mv', tool_name: 'Edit', tool_input: { file_path: `${b}/y.js` } });
   sessionEnd({ cwd: b, session_id: 'mv' });
   assert.equal(search({ project: b, kind: 'summary' })[0].title, 'add pagination to the orders endpoint');
+});
+
+test('Codex: apply_patch edits, "Exit code" text failures and fix recall', () => {
+  const cwd = repo({ 'src/db.ts': 'export const url = process.env.DATABASE_URL' });
+  const codex = (session_id, extra) => ({ cwd, session_id, hook_event_name: 'PostToolUse', model: 'gpt-5', turn_id: 't', ...extra });
+  const sh = (session_id, command, tool_response) => codex(session_id, { tool_name: 'Bash', tool_input: { command }, tool_response });
+  sessionStart({ cwd, session_id: 'x1', source: 'startup' });
+  const failed = postToolUse(sh('x1', 'npm run test:integration', 'Exit code: 1\nWall time: 2.1 seconds\nOutput:\nPrismaClientInitializationError: Can\'t reach database server at `localhost:5432`\n'));
+  assert.equal(failed, null);
+  postToolUse(codex('x1', { tool_name: 'apply_patch', tool_input: { command: '*** Begin Patch\n*** Update File: src/db.ts\n@@\n-x\n+y\n*** End Patch' } }));
+  postToolUse(sh('x1', 'docker compose up -d postgres', { exit_code: 0, output: 'started' }));
+  const learned = postToolUse(sh('x1', 'npm run test:integration', 'Exit code: 0\nWall time: 3 seconds\nOutput:\nok\n'));
+  assert.match(ctx(learned), /saved fix memory/);
+  const fix = search({ project: cwd, query: 'database server', kind: 'fix' })[0];
+  assert.match(fix.body, /docker compose up -d postgres/);
+  assert.match(fix.body, /src\/db\.ts/);
+
+  const again = postToolUse(sh('x2', 'npm run test:integration', { exit_code: 1, output: 'PrismaClientInitializationError: Can\'t reach database server at `db.internal:5432`' }));
+  assert.equal(again.hookSpecificOutput.hookEventName, 'PostToolUse');
+  assert.match(ctx(again), /seen this error before/);
+});
+
+test('patchFiles and exitOf read Codex tool payloads', () => {
+  assert.deepEqual(patchFiles('*** Begin Patch\n*** Add File: a/new.py\n+x\n*** Update File: b.sql\n*** Move to: c.sql\n*** Delete File: d.txt\n*** End Patch'), ['a/new.py', 'b.sql', 'c.sql', 'd.txt']);
+  assert.deepEqual(exitOf('Exit code: 2\nWall time: 1s\nOutput:\nboom'), { code: 2, output: 'boom' });
+  assert.equal(exitOf({ exit_code: 0, output: 'fine' }).code, 0);
+  assert.equal(exitOf({ metadata: { exit_code: 127 }, output: 'nope' }).code, 127);
+  assert.equal(exitOf(undefined).code, 0);
+});
+
+test('MCP server started inside the plugin folder (Codex) finds the user\'s project', async () => {
+  const { project } = await import('../src/mcp.mjs');
+  const cwd = repo();
+  const saved = { dir: process.env.CLAUDE_PROJECT_DIR, pwd: process.env.PWD, cwd: process.cwd() };
+  try {
+    delete process.env.CLAUDE_PROJECT_DIR;
+    process.chdir(fileURLToPath(new URL('..', import.meta.url)));
+    process.env.PWD = cwd;
+    assert.equal(project(), cwd);
+    process.env.CLAUDE_PROJECT_DIR = cwd;
+    assert.equal(project(), cwd);
+  } finally {
+    if (saved.dir === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = saved.dir;
+    process.env.PWD = saved.pwd;
+    process.chdir(saved.cwd);
+  }
 });
