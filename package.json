@@ -1,6 +1,6 @@
 {
   "name": "deja-memory",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.",
   "type": "module",
   "bin": {

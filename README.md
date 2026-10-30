@@ -156,7 +156,7 @@ Command families decide what "the same command passing" means: `npm test -- --ci
 | `lineage` | Upstream and downstream for a table, path or Airflow DAG (see below) |
 | `scan_lineage` | Index every SQL, dbt, PySpark, notebook and Airflow file in the repo once |
 
-Slash commands: `/deja:recall`, `/deja:remember`, `/deja:lineage`, `/deja:stats`. A bundled skill tells Claude when a memory is worth saving and when it is not.
+Slash commands: `/deja:recall`, `/deja:remember`, `/deja:lineage`, `/deja:stats`, `/deja:ui`. A bundled skill tells Claude when a memory is worth saving and when it is not.
 
 ## How it works
 
@@ -217,6 +217,19 @@ downstream:
 
 Lineage is file-level and regex-based on purpose: it runs inside a hook in milliseconds and never fails. It does not resolve table names built dynamically at runtime.
 
+## See everything deja knows
+
+`/deja:ui` (or `deja ui` in a terminal) opens a visual browser of the current repo's memory: every decision, gotcha and fix, the command playbook with pass rates, the lineage graph and a session timeline. Search with `/`, filter by kind or by possibly stale, and click any dataset to re-center the graph on it.
+
+<p align="center"><img src="docs/assets/ui.png" alt="deja ui: memories, fixes, playbook, lineage and sessions in one page" width="860"></p>
+
+<details>
+<summary><b>Lineage view</b></summary>
+<p align="center"><img src="docs/assets/ui-lineage.png" alt="deja ui lineage graph: upstream and downstream of daily_revenue" width="860"></p>
+</details>
+
+It is a single HTML file written to `~/.deja/ui/`, with the data inlined. There is no server, no port and no network request, so it opens offline, follows your light or dark theme, and can be attached to an issue as it is. `deja ui --all` covers every repo on the machine, and `--out FILE` writes it somewhere else.
+
 ## How deja compares
 
 claude-mem is the most popular memory plugin and a great project that pioneered much of this. deja makes different trade-offs. This table reflects claude-mem's own documentation as of October 2026:
@@ -229,11 +242,11 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 | Error → fix recall at the moment of failure | Yes | Not documented |
 | Stale-memory detection (file hashes) | Yes | Not documented |
 | Data lineage (SQL, dbt, Spark, Airflow) | Yes | Not documented |
-| Web viewer UI | Not yet | Yes |
+| Visual browser | Yes, a single offline HTML file | Yes, a web viewer served by the worker |
 | Semantic (embedding) search | No, FTS5 keyword search | Yes, with Chroma |
 | Works with Gemini CLI, OpenCode, Codex | Not yet | Yes |
 
-If you want semantic search and a web UI today, use claude-mem. If you want something that cannot break your session, costs nothing and learns from your failures, use deja.
+If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs nothing and learns from your failures, use deja.
 
 ## Performance
 
@@ -269,6 +282,7 @@ deja remember <title> --body "..." --kind decision --files src/a.ts
 deja forget <id...>                          deja stats [--all]
 deja export [--json] [--out FILE]            deja import <file.json>
 deja prune [--days 90]                       deja doctor
+deja ui [--all] [--out FILE] [--no-open]
 ```
 
 `deja export > MEMORY.md` writes readable Markdown you can commit, so teammates and new contributors start with the same knowledge. `deja export --json` and `deja import` move memories between machines.
@@ -298,7 +312,7 @@ deja prune [--days 90]                       deja doctor
 
 ## Roadmap
 
-- [ ] `deja ui`: a static, single-file HTML viewer for memories and the lineage graph
+- [x] `deja ui`: a static, single-file HTML viewer for memories and the lineage graph
 - [ ] Optional local embeddings for semantic recall, still with zero required dependencies
 - [ ] Adapters for Codex, Gemini CLI and OpenCode
 - [ ] Team memory: re-import the committed Markdown on `git pull`

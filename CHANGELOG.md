@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+**New: `deja ui`**
+- `/deja:ui` or `deja ui` opens a visual browser of everything deja knows about a repo: memories with kind and staleness filters, learned fixes (error, fix and cause), the command playbook with pass rates, an interactive lineage graph and a session timeline.
+- It is one self-contained HTML file with the data inlined: no server, no port, no network. It works offline, follows the system light or dark theme with a manual toggle, and fits phone screens.
+- `--all` covers every repo on the machine, `--out FILE` picks the path and `--no-open` skips launching the browser.
+- Memory text is escaped so nothing stored can break out of the page's data block.
+
 ## 0.2.0
 
 **New: command playbook**
