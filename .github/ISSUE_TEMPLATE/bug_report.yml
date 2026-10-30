@@ -1,0 +1,44 @@
+name: Bug report
+description: Something in deja does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Please run `node <plugin dir>/bin/deja.mjs doctor` first and include its output.
+        Never paste secrets; deja redacts what it stores, but an issue is public.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what deja did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `npm test` in a repo where ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `deja doctor`
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Relevant lines from ~/.deja/deja.log
+      render: text
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: deja 0.2.0 · Claude Code 2.x · Node 22.x · macOS 15
+    validations:
+      required: true

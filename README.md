@@ -1,35 +1,83 @@
 <p align="center">
-  <img src="docs/assets/icon.png" width="96" alt="deja logo">
-</p>
-
-<h1 align="center">deja</h1>
-
-<p align="center">
-  <b>Memory for Claude Code that never debugs the same bug twice.</b><br>
-  Any language, any stack. Zero dependencies. No daemon. No extra tokens.
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
+    <img src="docs/assets/banner-dark.svg" width="100%" alt="deja: memory for Claude Code that never debugs the same bug twice">
+  </picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/sagarkonkanagaon-netizenk/deja/actions/workflows/ci.yml"><img src="https://github.com/sagarkonkanagaon-netizenk/deja/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/dependencies-0-2dd4bf" alt="zero dependencies">
-  <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="node 22.13+">
-  <img src="https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-555" alt="macOS, Linux, Windows">
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
+  <a href="https://github.com/sagarkonkanagaon-netizenk/deja/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sagarkonkanagaon-netizenk/deja/ci.yml?branch=main&style=flat-square&label=CI&labelColor=0f172a" alt="CI"></a>
+  <img src="https://img.shields.io/badge/dependencies-0-2dd4bf?style=flat-square&labelColor=0f172a" alt="zero dependencies">
+  <img src="https://img.shields.io/badge/node-%E2%89%A522.13-2dd4bf?style=flat-square&labelColor=0f172a" alt="node 22.13+">
+  <img src="https://img.shields.io/badge/macOS%20%C2%B7%20Linux%20%C2%B7%20Windows-tested-2dd4bf?style=flat-square&labelColor=0f172a" alt="tested on macOS, Linux and Windows">
+  <a href="https://github.com/sagarkonkanagaon-netizenk/deja/tags"><img src="https://img.shields.io/github/v/tag/sagarkonkanagaon-netizenk/deja?sort=semver&style=flat-square&labelColor=0f172a&color=f59e0b&label=version" alt="release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=0f172a" alt="MIT license"></a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/hero.png" width="760" alt="Claude Code hits an error it saw three weeks ago, and deja hands back the fix">
+  <a href="#install"><b>Install</b></a> ·
+  <a href="#what-a-session-looks-like"><b>Tour</b></a> ·
+  <a href="#works-with-every-stack"><b>Stacks</b></a> ·
+  <a href="#how-it-works"><b>How it works</b></a> ·
+  <a href="docs/ARCHITECTURE.md"><b>Architecture</b></a> ·
+  <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
+
+<br>
 
 Claude Code forgets everything when a session ends. Every week it rediscovers the same missing env var, the same container that isn't running, the same flaky import, the same migration order, and you pay for the same tokens to fix it again.
 
-deja gives it a memory that behaves like a senior teammate's:
+**deja gives Claude Code a memory that behaves like a senior teammate's.** It installs in two commands, runs entirely on your machine, and adds no cost to a session.
 
-- **It remembers fixes, not transcripts.** When a command fails and later passes, deja records the error and exactly what changed in between. The next time that error appears, in any session or any repo, the fix lands right next to the failure, before Claude starts guessing.
-- **It knows when a memory is out of date.** Every memory is pinned to the content hash of the files it describes. Change the code and the memory is flagged as possibly stale instead of confidently steering Claude wrong.
-- **It learns how your repo actually runs.** The test, build, lint and dev commands that really work here, and the ones that need a step first, so no session starts by poking around `package.json`, `Makefile` and CI files to figure out how to run things.
-- **It brings back context at the right moment.** A compact briefing at session start, matching decisions when you ask for something related, and the gotchas about a file the moment Claude opens it.
-- **It costs nothing to run.** No background worker, no port, no vector database, no Python, no LLM calls of its own. Hooks are short-lived Node processes writing to one SQLite file with full-text search built in.
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### ↺ Remembers fixes, not transcripts
+When a command fails and later passes, deja records the error and exactly what changed in between. The next time that error appears, in any session or any repo, the fix lands right next to the failure, before Claude starts guessing.
+
+</td>
+<td width="50%" valign="top">
+
+### ◷ Knows when a memory is stale
+Every memory is pinned to the content hash of the files it describes. Change the code and the memory is flagged as possibly outdated instead of confidently steering Claude wrong.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ▶ Learns how your repo runs
+The test, build, lint and dev commands that really work here, and the ones that need a step first. No session starts by poking around `package.json`, `Makefile` and CI files.
+
+</td>
+<td width="50%" valign="top">
+
+### ◎ Context at the right moment
+A compact briefing at session start, matching decisions when you ask for something related, and the gotchas about a file the moment Claude opens it. Never the same thing twice.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ⚡ Costs nothing to run
+No background worker, no port, no vector database, no Python, no LLM calls of its own. Short-lived Node processes and one SQLite file with full-text search built in.
+
+</td>
+<td width="50%" valign="top">
+
+### ⛁ Maps your data, if you have any
+SQL, dbt, Spark, Delta Live Tables, notebooks and Airflow are turned into a lineage graph, so "what breaks if I change `orders`?" is one tool call.
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="docs/assets/hero.png" width="820" alt="Claude Code hits an error it saw three weeks ago, and deja hands back the fix">
+</p>
 
 ## Install
 
@@ -140,6 +188,9 @@ Ranking is BM25 from SQLite FTS5 (title weighted 4×, tags 2×), multiplied by a
 
 If your repo has SQL, dbt, Spark, Delta Live Tables, notebooks or Airflow DAGs, deja also maps which datasets each file reads and writes, so "what breaks if I change `orders`?" is one tool call. Repos without data files simply never use it.
 
+<details>
+<summary><b>Everything the lineage extractor understands</b></summary>
+
 | Source | What it finds |
 | --- | --- |
 | SQL (Postgres, MySQL, Snowflake, BigQuery, Spark SQL, Hive) | `INSERT INTO/OVERWRITE`, `MERGE INTO … USING`, `CREATE TABLE/VIEW … AS`, `COPY INTO`, `UPDATE`, `DELETE`; `FROM` / `JOIN` inputs with CTEs excluded; column lists from DDL |
@@ -148,6 +199,8 @@ If your repo has SQL, dbt, Spark, Delta Live Tables, notebooks or Airflow DAGs, 
 | Delta Live Tables | `@dlt.table` / `@dlt.view` targets, `dlt.read` / `dlt.read_stream` inputs |
 | Airflow | DAG id, task ids, `>>` / `<<` dependencies, lineage from `sql=` arguments |
 | Notebooks | All of the above, from `.ipynb` code cells |
+
+</details>
 
 ```text
 $ deja lineage analytics.daily_revenue
@@ -222,6 +275,9 @@ deja prune [--days 90]                       deja doctor
 
 ## Configuration
 
+<details>
+<summary><b>All environment variables</b></summary>
+
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `DEJA_HOME` | `~/.deja` | Where the database and logs live |
@@ -229,6 +285,8 @@ deja prune [--days 90]                       deja doctor
 | `DEJA_KEEP_SUMMARIES` | `200` | Session summaries kept per repo |
 | `DEJA_DISABLE` | unset | `1` turns every hook into a no-op |
 | `DEJA_TIMING` | unset | `1` logs each hook's duration to `~/.deja/timing.log` |
+
+</details>
 
 ## Troubleshooting
 

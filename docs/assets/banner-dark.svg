@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="deja: memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0f1f"/><stop offset="1" stop-color="#1b1446"/></linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#1f2a44"/></pattern>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#2dd4bf" stop-opacity="0.35"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/></radialGradient>
+    <style>
+      .t { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; }
+      .m { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+      .ring { transform-origin: 196px 200px; animation: echo 4s ease-out infinite; }
+      .ring.r2 { animation-delay: 1.33s; } .ring.r3 { animation-delay: 2.66s; }
+      @keyframes echo { 0% { transform: scale(0.55); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+      .l1, .l2, .l3, .l4 { opacity: 0; animation: show 9s infinite; }
+      .l2 { animation-delay: 1.2s; } .l3 { animation-delay: 2.4s; } .l4 { animation-delay: 3.6s; }
+      @keyframes show { 0% { opacity: 0; transform: translateY(6px); } 5% { opacity: 1; transform: none; } 85% { opacity: 1; } 95%, 100% { opacity: 0; } }
+      .cursor { animation: blink 1s steps(1) infinite; } @keyframes blink { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { .ring, .l1, .l2, .l3, .l4, .cursor { animation: none; opacity: 1; } .ring { opacity: 0.25; } }
+    </style>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+  <rect width="1280" height="400" rx="24" fill="url(#dots)"/>
+  <circle cx="196" cy="200" r="150" fill="url(#glow)"/>
+  <g fill="none" stroke-width="3">
+    <circle class="ring" cx="196" cy="200" r="70" stroke="#2dd4bf"/>
+    <circle class="ring r2" cx="196" cy="200" r="70" stroke="#2dd4bf"/>
+    <circle class="ring r3" cx="196" cy="200" r="70" stroke="#f59e0b"/>
+  </g>
+  <g transform="translate(116 120) scale(0.3125)">
+    <rect width="512" height="512" rx="112" fill="#0f172a"/>
+    <circle cx="226" cy="268" r="118" fill="none" stroke="#f59e0b" stroke-width="34" opacity="0.5"/>
+    <circle cx="286" cy="244" r="118" fill="none" stroke="#2dd4bf" stroke-width="34"/>
+    <path d="M286 126 l38 -28 M286 126 l38 28" stroke="#2dd4bf" stroke-width="30" stroke-linecap="round" fill="none"/>
+  </g>
+  <text x="340" y="150" class="t" font-size="80" font-weight="800" fill="#e6edf3" letter-spacing="-2">deja</text>
+  <text x="344" y="196" class="t" font-size="26" font-weight="600" fill="#e6edf3">Memory for Claude Code that never</text><text x="344" y="230" class="t" font-size="26" font-weight="600" fill="#e6edf3">debugs the same bug twice.</text>
+  <text x="344" y="266" class="t" font-size="17" fill="#94a3b8">Recalls past fixes · flags stale memories · learns how your repo runs</text>
+  <g class="t" font-size="15" font-weight="600">
+    <rect x="344" y="292" width="170" height="36" rx="18" fill="#111827" stroke="#30363d"/><text x="429" y="315" text-anchor="middle" fill="#2dd4bf">0 dependencies</text>
+    <rect x="526" y="292" width="128" height="36" rx="18" fill="#111827" stroke="#30363d"/><text x="590" y="315" text-anchor="middle" fill="#2dd4bf">no daemon</text>
+    <rect x="666" y="292" width="162" height="36" rx="18" fill="#111827" stroke="#30363d"/><text x="747" y="315" text-anchor="middle" fill="#2dd4bf">0 extra tokens</text>
+    <rect x="840" y="292" width="112" height="36" rx="18" fill="#111827" stroke="#30363d"/><text x="896" y="315" text-anchor="middle" fill="#2dd4bf">any stack</text>
+  </g>
+  <g transform="translate(980 90)">
+    <rect width="270" height="220" rx="14" fill="#0d1117" stroke="#30363d"/>
+    <circle cx="20" cy="18" r="5" fill="#ff5f57"/><circle cx="36" cy="18" r="5" fill="#febc2e"/><circle cx="52" cy="18" r="5" fill="#28c840"/>
+    <g class="m" font-size="12.5">
+      <text class="l1" x="16" y="58" fill="#e6edf3">$ npm test</text>
+      <text class="l2" x="16" y="86" fill="#f87171">✘ Cannot find module</text>
+      <text class="l2" x="32" y="104" fill="#f87171">'express'</text>
+      <text class="l3" x="16" y="136" fill="#2dd4bf">↺ deja · seen 12d ago</text>
+      <text class="l3" x="32" y="154" fill="#94a3b8">ran npm i express</text>
+      <text class="l4" x="16" y="188" fill="#4ade80">✓ fixed in one step</text>
+      <rect class="cursor" x="16" y="198" width="8" height="3" fill="#e6edf3"/>
+    </g>
+  </g>
+</svg>
