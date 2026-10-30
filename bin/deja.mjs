@@ -64,6 +64,7 @@ Usage: deja <command> [options]
   stats                 Counts for this project  --all for every project
   export                Write memories as Markdown (default) or --json, for sharing in git
   import <file.json>    Load memories exported with --json into this project
+  ui                    Visual browser of memories, fixes, playbook, lineage  --all  --out F  --no-open
   prune [--days 90]     Drop old session summaries and logs; keeps everything you saved
   doctor                Check the install
   hook <Event>          (used by Claude Code)
@@ -156,6 +157,25 @@ async function main() {
         n++;
       }
       return console.log(`Imported ${n} memories into ${projectName(project)}.`);
+    }
+    case 'ui': {
+      const { collect, render } = await import('../src/ui.mjs');
+      const { mkdirSync, writeFileSync: write } = await import('node:fs');
+      const { spawn } = await import('node:child_process');
+      const all = !!f.all;
+      const slug = all ? 'all-projects' : projectName(project).replace(/[^\w.-]+/g, '-');
+      const out = resolve(f.out || join(dejaHome(), 'ui', `${slug}.html`));
+      mkdirSync(join(out, '..'), { recursive: true });
+      const data = collect(all ? null : project);
+      write(out, render(data));
+      console.log(`deja ui: ${data.memories.length} memories, ${data.commands.length} commands, ${data.datasets.length} datasets → ${out}`);
+      if (!f['no-open'] && !process.env.CI) {
+        const [bin, args] = process.platform === 'darwin' ? ['open', [out]] : process.platform === 'win32' ? ['cmd', ['/c', 'start', '', out]] : ['xdg-open', [out]];
+        try {
+          spawn(bin, args, { detached: true, stdio: 'ignore' }).on('error', () => {}).unref();
+        } catch {}
+      }
+      return;
     }
     case 'prune': {
       const db = openDb();

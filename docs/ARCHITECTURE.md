@@ -135,4 +135,4 @@ Edges are file-level: every input of a file feeds every output of that file. Re-
 
 ## Testing
 
-`npm test` runs `node:test` suites covering signatures across stacks, command families and targets, redaction, every lineage parser, multi-hop traversal, the full hook flow (learn, recall, cross-repo, flaky retries, compact reset, worktrees), staleness, migrations, and the MCP protocol. CI runs the suites on Linux, macOS and Windows with Node 22 and 24, plus `doctor` and the benchmark.
+`npm test` runs `node:test` suites covering signatures across stacks, command families and targets, redaction, every lineage parser, multi-hop traversal, the full hook flow (learn, recall, cross-repo, flaky retries, compact reset, worktrees), staleness, migrations, the MCP protocol, and that the `deja ui` page inlines its data without letting stored text escape the data block. CI runs the suites on Linux, macOS and Windows with Node 22 and 24, plus `doctor` and the benchmark.
