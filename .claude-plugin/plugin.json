@@ -1,0 +1,10 @@
+{
+  "name": "deja",
+  "version": "0.1.0",
+  "description": "Memory for Claude Code that never debugs the same bug twice. Recalls past fixes the moment an error repeats, flags memories when the code they describe changes, and maps data lineage. Zero dependencies, no daemon, no extra tokens.",
+  "author": { "name": "Sagar", "url": "https://github.com/sagarkonkanagaon-netizenk" },
+  "homepage": "https://github.com/sagarkonkanagaon-netizenk/deja",
+  "repository": "https://github.com/sagarkonkanagaon-netizenk/deja",
+  "license": "MIT",
+  "keywords": ["memory", "context", "claude-code", "mcp", "sqlite", "data-lineage", "dbt", "spark", "airflow"]
+}

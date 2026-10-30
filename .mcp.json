@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "deja": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/bin/deja.mjs",
+        "mcp"
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 330" width="880" height="330" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">
+  <rect width="880" height="330" rx="14" fill="#0d1117"/>
+  <rect width="880" height="38" rx="14" fill="#161b22"/>
+  <rect y="24" width="880" height="14" fill="#161b22"/>
+  <circle cx="24" cy="19" r="6" fill="#ff5f57"/><circle cx="44" cy="19" r="6" fill="#febc2e"/><circle cx="64" cy="19" r="6" fill="#28c840"/>
+  <text x="440" y="24" fill="#8b949e" text-anchor="middle" font-size="13">claude · orders-pipeline · 3 weeks later</text>
+  <text x="28" y="76" fill="#8b949e">⏺</text><text x="48" y="76" fill="#e6edf3">Bash(spark-submit jobs/silver_orders.py)</text>
+  <text x="48" y="102" fill="#f85149">  ⎿  AnalysisException: [DELTA_FAILED_TO_MERGE_FIELDS] Failed to merge</text>
+  <text x="48" y="122" fill="#f85149">     fields 'amount' and 'amount'. Failed to merge incompatible data types</text>
+  <text x="48" y="142" fill="#f85149">     DecimalType(12,2) and DoubleType</text>
+  <rect x="40" y="164" width="800" height="92" rx="8" fill="#0b2a2a" stroke="#2dd4bf" stroke-opacity="0.6"/>
+  <text x="58" y="190" fill="#2dd4bf">deja has seen this error before:</text>
+  <text x="58" y="214" fill="#e6edf3">- #41 22d ago: edited jobs/silver_orders.py; cast amount to decimal(12,2)</text>
+  <text x="58" y="236" fill="#e6edf3">  before the MERGE; then `spark-submit jobs/silver_orders.py` passed.</text>
+  <text x="28" y="286" fill="#8b949e">⏺</text><text x="48" y="286" fill="#e6edf3">Same schema drift as last time. Applying the cast from fix #41…</text>
+  <text x="48" y="312" fill="#3fb950">  ✓ fixed in one step, zero extra tokens, no daemon</text>
+</svg>
