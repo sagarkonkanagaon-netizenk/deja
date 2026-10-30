@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest something that would make deja more useful
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What slows you down today? A real example helps most.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like deja to do
+    validations:
+      required: true
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: deja's principles
+      options:
+        - label: This works without a background process, an extra LLM call, or a new runtime dependency

@@ -1,0 +1,26 @@
+name: Missed or wrong error match
+description: deja did not recognise an error it had seen, or matched the wrong fix
+labels: [signatures]
+body:
+  - type: markdown
+    attributes:
+      value: These reports directly improve error signatures. Remove anything private from the output before pasting.
+  - type: textarea
+    id: first
+    attributes:
+      label: The first error output
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: second
+    attributes:
+      label: The later error output that should (or should not) have matched
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: tool
+    attributes:
+      label: Tool and command
+      placeholder: pytest 8 · `uv run pytest tests/api`
