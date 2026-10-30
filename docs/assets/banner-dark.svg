@@ -9,7 +9,7 @@
       .ring { transform-origin: 196px 200px; animation: echo 4s ease-out infinite; }
       .ring.r2 { animation-delay: 1.33s; } .ring.r3 { animation-delay: 2.66s; }
       @keyframes echo { 0% { transform: scale(0.55); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
-      .l1, .l2, .l3, .l4 { opacity: 0; animation: show 9s infinite; }
+      .l1, .l2, .l3, .l4 { animation: show 9s infinite both; }
       .l2 { animation-delay: 1.2s; } .l3 { animation-delay: 2.4s; } .l4 { animation-delay: 3.6s; }
       @keyframes show { 0% { opacity: 0; transform: translateY(6px); } 5% { opacity: 1; transform: none; } 85% { opacity: 1; } 95%, 100% { opacity: 0; } }
       .cursor { animation: blink 1s steps(1) infinite; } @keyframes blink { 50% { opacity: 0; } }
