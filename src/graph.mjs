@@ -9,6 +9,8 @@ import { now, relPath } from './util.mjs';
 export function recordFile(project, absPath, text) {
   let found;
   try {
+    // Generated or vendored giants are not worth parsing inside a hook.
+    if (text === undefined && statSync(absPath).size > 1_000_000) return null;
     found = lineageFor(absPath, text ?? readFileSync(absPath, 'utf8'));
   } catch {
     return null;

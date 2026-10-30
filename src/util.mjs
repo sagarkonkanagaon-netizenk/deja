@@ -11,7 +11,11 @@ export function projectRoot(cwd = process.cwd()) {
   if (rootCache.has(start)) return rootCache.get(start);
   let dir = start;
   for (;;) {
-    if (existsSync(join(dir, '.git'))) break;
+    const git = join(dir, '.git');
+    if (existsSync(git)) {
+      dir = mainWorktree(git) || dir;
+      break;
+    }
     const up = dirname(dir);
     if (up === dir) {
       dir = start;
@@ -21,6 +25,30 @@ export function projectRoot(cwd = process.cwd()) {
   }
   rootCache.set(start, dir);
   return dir;
+}
+
+// A linked worktree has a .git file pointing into the main repo's .git/worktrees/<name>.
+// Memories belong to the repository, so every worktree shares the main checkout's key.
+function mainWorktree(git) {
+  try {
+    if (statSync(git).isDirectory()) return null;
+    const m = readFileSync(git, 'utf8').match(/^gitdir:\s*(.+?)\s*$/m);
+    if (!m) return null;
+    const gitdir = resolve(dirname(git), m[1]);
+    const i = gitdir.replace(/\\/g, '/').lastIndexOf('/.git/worktrees/');
+    return i === -1 ? null : gitdir.slice(0, i);
+  } catch {
+    return null;
+  }
+}
+
+export function fileStat(path) {
+  try {
+    const st = statSync(path);
+    return { mtime: Math.floor(st.mtimeMs), size: st.size };
+  } catch {
+    return null;
+  }
 }
 
 export const projectName = (root) => basename(root) || root;

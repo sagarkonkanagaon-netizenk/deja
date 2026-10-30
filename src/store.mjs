@@ -2,7 +2,7 @@
 import { resolve, isAbsolute } from 'node:path';
 import { openDb, tx } from './db.mjs';
 import { redact } from './redact.mjs';
-import { hashFile, now, relPath } from './util.mjs';
+import { fileStat, hashFile, now, relPath } from './util.mjs';
 
 export const KINDS = ['decision', 'gotcha', 'fix', 'note', 'todo', 'summary'];
 
@@ -36,10 +36,11 @@ export function addMemory({ project, sessionId = null, kind = 'note', title, bod
 }
 
 function anchor(db, id, project, files) {
-  const ins = db.prepare('INSERT OR REPLACE INTO anchors (memory_id, path, hash) VALUES (?, ?, ?)');
+  const ins = db.prepare('INSERT OR REPLACE INTO anchors (memory_id, path, hash, mtime, size) VALUES (?, ?, ?, ?, ?)');
   for (const f of [...new Set(files)].slice(0, 20)) {
     const abs = isAbsolute(f) ? f : resolve(project, f);
-    ins.run(id, relPath(project, abs), hashFile(abs));
+    const st = fileStat(abs);
+    ins.run(id, relPath(project, abs), hashFile(abs), st?.mtime ?? null, st?.size ?? null);
   }
 }
 
@@ -48,13 +49,22 @@ function anchor(db, id, project, files) {
 export function refreshStaleness(project, limit = 400) {
   const db = openDb();
   const rows = db.prepare(`
-    SELECT a.memory_id, a.path, a.hash, m.stale FROM anchors a JOIN memories m ON m.id = a.memory_id
+    SELECT a.memory_id, a.path, a.hash, a.mtime, a.size, m.stale FROM anchors a JOIN memories m ON m.id = a.memory_id
     WHERE m.project = ? AND a.hash IS NOT NULL ORDER BY m.updated_at DESC LIMIT ?`).all(project, limit);
+  const touch = db.prepare('UPDATE anchors SET mtime = ?, size = ? WHERE memory_id = ? AND path = ?');
   const byMemory = new Map();
   for (const r of rows) {
-    const changed = hashFile(resolve(project, r.path)) !== r.hash;
-    const prev = byMemory.get(r.memory_id) || { changed: false, stale: r.stale };
-    byMemory.set(r.memory_id, { changed: prev.changed || changed, stale: r.stale });
+    const abs = resolve(project, r.path);
+    const st = fileStat(abs);
+    let changed;
+    if (!st) changed = true;
+    else if (st.mtime === r.mtime && st.size === r.size) changed = false; // untouched: skip hashing
+    else {
+      changed = hashFile(abs) !== r.hash;
+      if (!changed) touch.run(st.mtime, st.size, r.memory_id, r.path); // touched but identical
+    }
+    const prev = byMemory.get(r.memory_id);
+    byMemory.set(r.memory_id, { changed: (prev?.changed ?? false) || changed, stale: r.stale });
   }
   const set = db.prepare('UPDATE memories SET stale = ? WHERE id = ?');
   let flipped = 0;
@@ -79,7 +89,7 @@ export function ftsQuery(text) {
   return uniq.map((w) => `"${w}"${w.length > 3 ? '*' : ''}`).join(' OR ');
 }
 
-export function search({ project, query, kind, limit = 10, allProjects = false, includeStale = true }) {
+export function search({ project, query, kind = undefined, limit = 10, allProjects = false, includeStale = true }) {
   const db = openDb();
   const q = ftsQuery(query || '');
   const where = [];

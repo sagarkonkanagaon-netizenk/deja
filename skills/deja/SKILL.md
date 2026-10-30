@@ -9,8 +9,8 @@ deja records sessions automatically: failed commands and the steps that fixed th
 
 ## Save with `remember` when
 
-- You choose between options for a reason that is not in the code ("Use replaceWhere for backfills: full overwrite drops late partitions"). Kind `decision`.
-- Something surprised you or cost time ("The staging warehouse lowercases column names"). Kind `gotcha`.
+- You choose between options for a reason that is not in the code ("API errors use RFC 7807 problem+json: the mobile app parses `type`, not `message`"). Kind `decision`.
+- Something surprised you or cost time ("Integration tests need `docker compose up -d postgres`; the .env URL points at RDS"). Kind `gotcha`.
 - An automatic fix memory says what changed but not why. Save the root cause as kind `fix` with the same files.
 - Work is left unfinished. Kind `todo`.
 

@@ -1,16 +1,45 @@
 {
   "name": "deja-memory",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.",
   "type": "module",
-  "bin": { "deja": "bin/deja.mjs" },
-  "files": ["bin", "src", "hooks", "commands", "skills", ".claude-plugin", ".mcp.json"],
-  "engines": { "node": ">=22.13" },
+  "bin": {
+    "deja": "bin/deja.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "hooks",
+    "commands",
+    "skills",
+    ".claude-plugin",
+    ".mcp.json"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "test": "node --no-warnings --test test/*.test.mjs",
-    "bench": "node --no-warnings bench/bench.mjs"
+    "bench": "node --no-warnings bench/bench.mjs",
+    "typecheck": "tsc -p jsconfig.json"
   },
-  "keywords": ["claude-code", "claude-code-plugin", "memory", "mcp", "sqlite", "fts5", "data-lineage", "dbt", "spark", "airflow"],
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "memory",
+    "persistent-memory",
+    "mcp",
+    "sqlite",
+    "fts5",
+    "debugging",
+    "developer-tools",
+    "ai-agents",
+    "data-lineage"
+  ],
   "repository": "github:sagarkonkanagaon-netizenk/deja",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.0"
+  }
 }

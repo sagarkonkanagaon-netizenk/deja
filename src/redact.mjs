@@ -1,6 +1,7 @@
 // Everything is redacted before it touches disk. Nothing leaves the machine anyway,
 // but a memory database full of tokens is still a liability.
 
+/** @type {Array<[RegExp, string]>} */
 const PATTERNS = [
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, '[private key]'],
   [/\b(AKIA|ASIA)[0-9A-Z]{16}\b/g, '[aws key]'],

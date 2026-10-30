@@ -64,6 +64,7 @@ Usage: deja <command> [options]
   stats                 Counts for this project  --all for every project
   export                Write memories as Markdown (default) or --json, for sharing in git
   import <file.json>    Load memories exported with --json into this project
+  prune [--days 90]     Drop old session summaries and logs; keeps everything you saved
   doctor                Check the install
   hook <Event>          (used by Claude Code)
   mcp                   (used by Claude Code) run the MCP server
@@ -155,6 +156,16 @@ async function main() {
         n++;
       }
       return console.log(`Imported ${n} memories into ${projectName(project)}.`);
+    }
+    case 'prune': {
+      const db = openDb();
+      const days = Number(f.days) || 90;
+      const cutoff = Date.now() - days * 86_400_000;
+      const summaries = db.prepare("DELETE FROM memories WHERE kind = 'summary' AND created_at < ?").run(cutoff).changes;
+      const failures = db.prepare('DELETE FROM failures WHERE created_at < ?').run(cutoff).changes;
+      const sessions = db.prepare('DELETE FROM sessions WHERE started_at < ?').run(cutoff).changes;
+      db.exec("INSERT INTO memories_fts(memories_fts) VALUES ('optimize'); VACUUM;");
+      return console.log(`Removed ${summaries} session summaries, ${failures} old failures and ${sessions} sessions older than ${days} days. Decisions, gotchas, fixes, notes and todos are kept.`);
     }
     case 'doctor': {
       const ok = (b, msg) => console.log(`${b ? '✔' : '✘'} ${msg}`);
