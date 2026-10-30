@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve, isAbsolute } from 'node:path';
+import { basename, dirname, join, relative, resolve, isAbsolute, sep } from 'node:path';
 
 export const now = () => Date.now();
 
@@ -29,7 +29,8 @@ export function relPath(root, path) {
   if (!path) return path;
   const abs = isAbsolute(path) ? path : resolve(root, path);
   const rel = relative(root, abs);
-  return rel.startsWith('..') ? abs : rel;
+  // Forward slashes everywhere, so memories and exports match across operating systems.
+  return rel.startsWith('..') ? abs : rel.split(sep).join('/');
 }
 
 export function hashFile(path) {
