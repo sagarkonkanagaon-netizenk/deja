@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/dependencies-0-2dd4bf?style=flat-square&labelColor=0f172a" alt="zero dependencies">
   <img src="https://img.shields.io/badge/node-%E2%89%A522.13-2dd4bf?style=flat-square&labelColor=0f172a" alt="node 22.13+">
   <img src="https://img.shields.io/badge/macOS%20%C2%B7%20Linux%20%C2%B7%20Windows-tested-2dd4bf?style=flat-square&labelColor=0f172a" alt="tested on macOS, Linux and Windows">
-  <a href="https://github.com/sagarkonkanagaon-netizenk/deja/tags"><img src="https://img.shields.io/github/v/tag/sagarkonkanagaon-netizenk/deja?sort=semver&style=flat-square&labelColor=0f172a&color=f59e0b&label=version" alt="release"></a>
+  <a href="https://github.com/sagarkonkanagaon-netizenk/deja/blob/main/CHANGELOG.md"><img src="https://img.shields.io/github/package-json/v/sagarkonkanagaon-netizenk/deja?style=flat-square&labelColor=0f172a&color=f59e0b&label=version" alt="version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=0f172a" alt="MIT license"></a>
 </p>
 
