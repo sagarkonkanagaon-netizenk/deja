@@ -1,6 +1,6 @@
 {
   "name": "deja",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Memory for Claude Code that never debugs the same bug twice. Recalls the fix the moment an error repeats, flags memories when the code they describe changes, learns the commands that actually work in each repo, and briefs every session with your project's decisions and gotchas. Any language, any stack. Zero dependencies, no daemon, no extra tokens.",
   "author": {
     "name": "Sagar",

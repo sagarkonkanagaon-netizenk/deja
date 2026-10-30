@@ -171,28 +171,58 @@ export function postToolUse(input) {
   const ti = input.tool_input || {};
   const notes = [];
 
+  const seeFile = (file, edited) => {
+    if (edited) db.prepare('INSERT INTO touches (session_id, path, tool, at) VALUES (?, ?, ?, ?)').run(s.id, relPath(project, file), tool, now());
+    if (LINEAGE_EXT.has(extname(file).toLowerCase())) recordFile(project, file);
+    const mem = fileMemories(db, s, project, file);
+    if (mem) notes.push(mem);
+  };
   if (EDIT_TOOLS.has(tool) || tool === 'Read') {
     const file = absPath(input, ti.file_path || ti.notebook_path);
-    if (file) {
-      if (EDIT_TOOLS.has(tool)) db.prepare('INSERT INTO touches (session_id, path, tool, at) VALUES (?, ?, ?, ?)').run(s.id, relPath(project, file), tool, now());
-      if (LINEAGE_EXT.has(extname(file).toLowerCase())) recordFile(project, file);
-      const mem = fileMemories(db, s, project, file);
-      if (mem) notes.push(mem);
-    }
+    if (file) seeFile(file, EDIT_TOOLS.has(tool));
+  }
+  // Codex edits files with apply_patch; the patch text names every file it touches.
+  if (!ti.file_path && typeof ti.command === 'string' && ti.command.includes('*** Begin Patch')) {
+    for (const p of patchFiles(ti.command)) seeFile(absPath(input, p), true);
+    return out('PostToolUse', notes.join('\n\n') || null);
   }
 
-  if (tool === 'Bash' && ti.command) {
+  if ((tool === 'Bash' || tool === 'shell' || tool === 'exec_command') && ti.command) {
     const command = redact(ti.command);
-    const resp = input.tool_response || {};
-    // Some versions report a non-zero exit as a successful tool call with an error code.
-    const code = resp.exitCode ?? resp.exit_code ?? resp.returnCode;
-    if (code && code !== 0) return failure({ ...input, error: `Exit code ${code}\n${resp.stderr || ''}\n${resp.stdout || ''}` });
+    // Claude Code reports failures through PostToolUseFailure; Codex (and some Claude Code
+    // versions) report a non-zero exit here, as an object or as "Exit code: N" text.
+    const { code, output } = exitOf(input.tool_response);
+    if (code) {
+      const r = failure({ ...input, tool_name: 'Bash', error: `Exit code ${code}\n${output}` });
+      if (r) r.hookSpecificOutput.hookEventName = 'PostToolUse';
+      return r;
+    }
     db.prepare('INSERT INTO touches (session_id, path, tool, at) VALUES (?, ?, ?, ?)').run(s.id, clip(command, 300), 'Bash', now());
     playbook(db, project, command, true);
     const learned = resolveFailures(db, s, project, command);
     if (learned) notes.push(learned);
   }
   return out('PostToolUse', notes.join('\n\n') || null);
+}
+
+/** Files named in an apply_patch patch (added, updated, deleted or moved). */
+export function patchFiles(patch) {
+  const files = new Set();
+  for (const m of String(patch).matchAll(/^\*\*\* (?:Add|Update|Delete) File: (.+)$|^\*\*\* Move to: (.+)$/gm)) files.add((m[1] || m[2]).trim());
+  return [...files];
+}
+
+/** Exit code and output of a shell tool response, whatever shape the agent reports it in. */
+export function exitOf(resp) {
+  if (resp == null) return { code: 0, output: '' };
+  if (typeof resp === 'string') {
+    const m = resp.match(/^\s*(?:Exit code|Process exited with code|exit_code)[:=]?\s*(-?\d+)/im);
+    return { code: m ? Number(m[1]) : 0, output: resp.replace(/^\s*(?:Exit code|Wall time|Total output lines)[^\n]*\n/gim, '').replace(/^\s*Output:\s*\n/im, '') };
+  }
+  const meta = resp.metadata || {};
+  const code = Number(resp.exitCode ?? resp.exit_code ?? resp.returnCode ?? meta.exit_code ?? 0) || 0;
+  const output = [resp.stderr, resp.stdout, resp.output, resp.aggregated_output].filter((x) => typeof x === 'string' && x).join('\n');
+  return { code, output };
 }
 
 // `pytest tests/a.py` passing says nothing about `pytest tests/b.py`. A run with no

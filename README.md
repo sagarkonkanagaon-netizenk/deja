@@ -28,7 +28,7 @@
 
 Claude Code forgets everything when a session ends. Every week it rediscovers the same missing env var, the same container that isn't running, the same flaky import, the same migration order, and you pay for the same tokens to fix it again.
 
-**deja gives Claude Code a memory that behaves like a senior teammate's.** It installs in two commands, runs entirely on your machine, and adds no cost to a session.
+**deja gives Claude Code a memory that behaves like a senior teammate's.** It installs in two commands, runs entirely on your machine, and adds no cost to a session. It works the same in [OpenAI Codex](#openai-codex-chatgpt), with one memory shared between both.
 
 <table>
 <tr>
@@ -89,6 +89,19 @@ Requires Claude Code and Node.js 22.13 or newer on your `PATH` (check with `node
 ```
 
 Restart Claude Code. There is nothing to start, configure or keep running. Run `/deja:stats` to confirm it is recording. Update later with `/plugin update deja`.
+
+### OpenAI Codex (ChatGPT)
+
+deja is also a Codex plugin. In a terminal:
+
+```text
+codex plugin marketplace add sagarkonkanagaon-netizenk/deja
+codex plugin add deja@deja
+```
+
+Start Codex, run `/hooks` and trust deja's hooks (Codex asks once for every plugin that runs hooks). You get the same fix recall, stale detection, playbook, briefings and MCP tools. Codex edits through `apply_patch` and reports failed commands as exit codes; deja reads both.
+
+Claude Code and Codex share one memory in `~/.deja`, so a fix learned in one agent comes back in the other.
 
 ## What a session looks like
 
@@ -244,7 +257,8 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 | Data lineage (SQL, dbt, Spark, Airflow) | Yes | Not documented |
 | Visual browser | Yes, a single offline HTML file | Yes, a web viewer served by the worker |
 | Semantic (embedding) search | No, FTS5 keyword search | Yes, with Chroma |
-| Works with Gemini CLI, OpenCode, Codex | Not yet | Yes |
+| Works with OpenAI Codex | Yes, one shared memory with Claude Code | Yes |
+| Works with Gemini CLI, OpenCode | Not yet | Yes |
 
 If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs nothing and learns from your failures, use deja.
 
@@ -314,7 +328,8 @@ deja ui [--all] [--out FILE] [--no-open]
 
 - [x] `deja ui`: a static, single-file HTML viewer for memories and the lineage graph
 - [ ] Optional local embeddings for semantic recall, still with zero required dependencies
-- [ ] Adapters for Codex, Gemini CLI and OpenCode
+- [x] OpenAI Codex plugin, sharing memory with Claude Code
+- [ ] Adapters for Gemini CLI and OpenCode
 - [ ] Team memory: re-import the committed Markdown on `git pull`
 - [ ] Column-level lineage for SQL
 
