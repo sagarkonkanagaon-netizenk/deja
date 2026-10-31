@@ -44,8 +44,10 @@ function anchor(db, id, project, files) {
   }
 }
 
-// A memory goes stale when a file it was anchored to has changed since.
-// Checked lazily (at session start and on recall), never in the background.
+/**
+ * Flags memories whose anchored files changed since they were written. Runs lazily
+ * (at session start and on recall), never in the background.
+ */
 export function refreshStaleness(project, limit = 400) {
   const db = openDb();
   const rows = db.prepare(`
@@ -116,7 +118,7 @@ export function search({ project, query, kind = undefined, limit = 10, allProjec
   return rank(rows).slice(0, limit);
 }
 
-// bm25 relevance, nudged by kind, recency and use; stale memories sink.
+/** Orders rows by bm25 relevance, adjusted for kind, recency and use; stale memories sink. */
 export function rank(rows, at = now()) {
   return rows
     .map((r) => {
@@ -148,7 +150,7 @@ export function forget(ids) {
   return ids.reduce((n, id) => n + Number(del.run(Number(id)).changes), 0);
 }
 
-// Past fixes for an error signature: this project first, then anywhere.
+/** Past fixes for an error signature: this project first, then any project. */
 export function fixesFor(signature, project, limit = 2) {
   return openDb().prepare(`
     SELECT * FROM memories WHERE kind = 'fix' AND signature = ?

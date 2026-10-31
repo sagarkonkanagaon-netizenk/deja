@@ -1,5 +1,6 @@
-// Claude Code hook handlers. Each runs in a short-lived process, touches SQLite,
-// prints at most one JSON object and exits. No daemon, no network, no LLM calls.
+// Hook handlers for Claude Code and Codex. Each runs in a short-lived process,
+// touches SQLite, prints at most one JSON object and exits. No daemon, no network,
+// no model calls.
 import { existsSync } from 'node:fs';
 import { extname, isAbsolute, join, resolve } from 'node:path';
 import { openDb, tx } from './db.mjs';
@@ -151,7 +152,7 @@ function absPath(input, p) {
   return isAbsolute(p) ? p : resolve(input.cwd || process.cwd(), p);
 }
 
-// Memories anchored to a file come back the first time Claude opens or edits it.
+// Memories anchored to a file come back the first time the agent opens or edits it.
 function fileMemories(db, s, project, file) {
   const seen = injectedSet(s);
   const rows = db.prepare(`SELECT m.* FROM anchors a JOIN memories m ON m.id = a.memory_id
@@ -240,7 +241,7 @@ export function sameTarget(failed, passed) {
   return false;
 }
 
-// `npm test 2>&1 | tail -20` is how Claude watched it, not how the repo runs it.
+// `npm test 2>&1 | tail -20` is how the agent watched it, not how the repo runs it.
 export function coreCommand(command) {
   return String(command)
     .replace(/\s*\|\s*(tail|head|grep|rg|tee|less|more|cat|wc|sort|uniq|cut|awk|sed|jq)\b.*$/s, '')
@@ -327,7 +328,7 @@ export function failure(input) {
 
 const words = (s) => new Set(String(s).toLowerCase().match(/[a-z_][a-z0-9_.']{2,}/g) || []);
 
-// Fallback when the exact signature is new: same error, different wording around it.
+// Fallback when the exact signature is new: the same error with different wording around it.
 function similarFixes(text, project) {
   const mine = words(text);
   if (mine.size < 3) return [];
@@ -349,7 +350,7 @@ export function stop(input) {
   return null;
 }
 
-// A deterministic summary: what was asked, what changed, what was learned.
+/** Writes a deterministic session summary: what was asked, what changed, what was learned. */
 export function sessionEnd(input) {
   const project = projectRoot(input.cwd);
   if (disabled(project)) return null;

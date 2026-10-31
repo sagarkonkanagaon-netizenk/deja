@@ -226,7 +226,7 @@ function memories(d) {
     '<button class="chip" data-kind="" aria-pressed="' + (!state.kind) + '">All</button>' +
     kinds.map((k) => '<button class="chip k-' + k + '" data-kind="' + k + '" aria-pressed="' + (state.kind === k) + '">' + (k === 'fix' ? 'fixes' : k + 's') + '</button>').join('') +
     '<button class="chip k-stale" id="stale" aria-pressed="' + state.staleOnly + '">possibly stale</button></div>' +
-    (rows.length ? '<div class="list">' + rows.map(card).join('') + '</div>' : empty(d.memories.length ? 'Nothing matches.' : 'No memories yet. deja fills this as you work: fixes are captured automatically, and Claude saves decisions and gotchas with <code>remember</code>.'));
+    (rows.length ? '<div class="list">' + rows.map(card).join('') + '</div>' : empty(d.memories.length ? 'Nothing matches.' : 'No memories yet. deja fills this as you work: fixes are captured automatically, and your agent saves decisions and gotchas with <code>remember</code>.'));
   for (const b of document.querySelectorAll('[data-kind]')) b.onclick = () => { state.kind = b.dataset.kind; draw(); };
   $('#stale').onclick = () => { state.staleOnly = !state.staleOnly; draw(); };
 }
@@ -261,7 +261,7 @@ function playbook(d) {
 
 function lineage(d) {
   const list = d.datasets.filter((x) => matches(x.name, x.file)).sort((a, b) => a.name.localeCompare(b.name));
-  if (!d.datasets.length) { $('#view').innerHTML = empty('No lineage yet. In a repo with SQL, dbt, Spark or Airflow, ask Claude to run the deja <code>scan_lineage</code> tool, or run <code>deja scan</code>.'); return; }
+  if (!d.datasets.length) { $('#view').innerHTML = empty('No lineage yet. In a repo with SQL, dbt, Spark or Airflow, ask your agent to run the deja <code>scan_lineage</code> tool, or run <code>deja scan</code>.'); return; }
   if (!state.ds || !d.datasets.some((x) => x.name === state.ds)) {
     const degree = {};
     for (const e of d.edges) { degree[e.src] = (degree[e.src] || 0) + 1; degree[e.dst] = (degree[e.dst] || 0) + 1; }

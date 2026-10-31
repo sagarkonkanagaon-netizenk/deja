@@ -1,5 +1,5 @@
-// Everything is redacted before it touches disk. Nothing leaves the machine anyway,
-// but a memory database full of tokens is still a liability.
+// Secret redaction. Everything is redacted before it is written to disk: nothing
+// leaves the machine, but a database full of credentials would still be a liability.
 
 /** @type {Array<[RegExp, string]>} */
 const PATTERNS = [
