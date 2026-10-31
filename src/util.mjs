@@ -4,7 +4,7 @@ import { basename, dirname, join, relative, resolve, isAbsolute, sep } from 'nod
 
 export const now = () => Date.now();
 
-// The project is the enclosing git root, so memories follow the repo, not the shell's cwd.
+/** The project is the enclosing git root, so memories follow the repo, not the shell's cwd. */
 const rootCache = new Map();
 export function projectRoot(cwd = process.cwd()) {
   const start = resolve(cwd);
@@ -72,7 +72,7 @@ export function hashFile(path) {
 
 export const sha = (s) => createHash('sha1').update(s).digest('hex').slice(0, 16);
 
-// Rough token estimate; good enough to keep injected context inside a budget.
+/** Rough token estimate (characters / 4); close enough to keep injected context inside a budget. */
 export const tokens = (s) => Math.ceil((s || '').length / 4);
 
 export function clip(s, max) {

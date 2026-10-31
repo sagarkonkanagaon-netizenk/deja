@@ -150,7 +150,7 @@ export function parsePython(text) {
   return { reads: [...reads], writes: [...writes], columns, dag: parseAirflow(src) };
 }
 
-// Airflow: DAG id, task ids and the >> / << dependencies between them.
+/** Airflow: the DAG id, its task ids and the >> / << dependencies between them. */
 export function parseAirflow(src) {
   const id =
     src.match(/\bDAG\(\s*(?:dag_id\s*=\s*)?["']([^"']+)["']/)?.[1] ||

@@ -15,8 +15,11 @@ function recentAutoFix(project) {
 
 const PLUGIN_DIR = resolve(import.meta.dirname, '..');
 
-// Claude Code says which project this is. Codex starts plugin MCP servers inside the
-// plugin's own folder, so fall back to the shell's PWD, then to the newest session.
+/**
+ * The project the agent is working in. Claude Code passes it in CLAUDE_PROJECT_DIR.
+ * Codex starts plugin MCP servers inside the plugin's own folder, so fall back to the
+ * shell's PWD, then to the most recent session.
+ */
 export function project() {
   if (process.env.CLAUDE_PROJECT_DIR) return projectRoot(process.env.CLAUDE_PROJECT_DIR);
   const here = projectRoot(process.cwd());

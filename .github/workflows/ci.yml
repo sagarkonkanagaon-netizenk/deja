@@ -17,8 +17,20 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm test
+      - run: npm run check
       - run: node bin/deja.mjs doctor
       - run: node --no-warnings bench/bench.mjs 2000 10
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - run: node scripts/check-commit.mjs "$PR_TITLE"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
   typecheck:
     runs-on: ubuntu-latest
     steps:

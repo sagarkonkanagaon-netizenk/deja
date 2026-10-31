@@ -5,7 +5,7 @@ import { openDb, tx } from './db.mjs';
 import { lineageFor } from './lineage.mjs';
 import { now, relPath } from './util.mjs';
 
-// Replace everything a file said about lineage with what it says now.
+/** Replaces everything a file said about lineage with what it says now. */
 export function recordFile(project, absPath, text) {
   let found;
   try {
@@ -86,7 +86,7 @@ export function findDatasets(project, pattern, limit = 20) {
     .all(project, like, String(pattern || '').toLowerCase(), limit);
 }
 
-// Walk the graph upstream, downstream or both, breadth first.
+/** Walks the graph upstream, downstream or both, breadth first. */
 export function trace(project, name, { direction = 'both', depth = 3 } = {}) {
   const db = openDb();
   const up = db.prepare("SELECT src AS node, file, op FROM edges WHERE project = ? AND dst = ? AND op != 'produces'");
