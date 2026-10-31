@@ -22,6 +22,7 @@
   <a href="#how-it-works"><b>How it works</b></a> ·
   <a href="#efficiency"><b>Efficiency</b></a> ·
   <a href="docs/ARCHITECTURE.md"><b>Architecture</b></a> ·
+  <a href="docs/STANDARDS.md"><b>Standards</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
 
