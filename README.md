@@ -62,8 +62,8 @@ A compact briefing at session start, matching decisions when you ask for somethi
 <tr>
 <td width="50%" valign="top">
 
-### ⚡ Costs nothing to run
-No background worker, no port, no vector database, no Python, no LLM calls of its own. Short-lived Node processes and one SQLite file with full-text search built in.
+### ⚡ Light to run
+No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#token-cost)). Short-lived Node processes and one SQLite file with full-text search built in.
 
 </td>
 <td width="50%" valign="top">
@@ -260,7 +260,24 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 | Works with OpenAI Codex | Yes, one shared memory with Claude Code | Yes |
 | Works with Gemini CLI, OpenCode | Not yet | Yes |
 
-If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs nothing and learns from your failures, use deja.
+If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs no extra model calls and learns from your failures, use deja.
+
+## Token cost
+
+deja never calls a model, so the only tokens it costs are the text it adds to the agent's context. Every piece is measured by `npm run tokens` (counts below use `@anthropic-ai/tokenizer`; current Claude models tokenize a little differently, so treat them as close estimates):
+
+| What deja adds | Tokens | When |
+| --- | ---: | --- |
+| MCP tool list and server instructions | 700 | once per session |
+| Session briefing, new project | 40 | session start |
+| Session briefing, typical project | 414 | session start, and after `/compact` or `/clear` |
+| Session briefing, 300 memories | 1,214 | capped by `DEJA_CONTEXT_TOKENS` (default 1,500) |
+| Same, with `DEJA_CONTEXT_TOKENS=500` | 408 | |
+| Related memories for a prompt | ~40 | only when relevant, each memory once per session |
+| Memories about a file being opened | ~40 | only when relevant, each memory once per session |
+| A known fix when an error repeats | ~40 | only when the error has been seen before |
+
+A typical session costs about 1,100 tokens up front and around 40 per useful note after that. One avoided round of re-debugging (reading the error, the files and the logs again, then re-running) usually costs more than that. To spend less, lower `DEJA_CONTEXT_TOKENS`; to spend nothing in a repo, add a `.deja-off` file.
 
 ## Performance
 

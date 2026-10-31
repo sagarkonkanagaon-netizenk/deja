@@ -9,7 +9,7 @@
     {
       "name": "deja",
       "source": "./",
-      "description": "Memory for Claude Code that never debugs the same bug twice. Any stack. Zero dependencies, no daemon, no extra tokens."
+      "description": "Memory for Claude Code that never debugs the same bug twice. Any stack. Zero dependencies, no daemon, no extra model calls."
     }
   ]
 }

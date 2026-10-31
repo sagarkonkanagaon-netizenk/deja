@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="deja: memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="deja: memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra model calls.">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#eef2ff"/></linearGradient>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#dbe3f0"/></pattern>
@@ -36,7 +36,7 @@
   <g class="t" font-size="15" font-weight="600">
     <rect x="344" y="292" width="170" height="36" rx="18" fill="#ffffff" stroke="#cbd5e1"/><text x="429" y="315" text-anchor="middle" fill="#0d9488">0 dependencies</text>
     <rect x="526" y="292" width="128" height="36" rx="18" fill="#ffffff" stroke="#cbd5e1"/><text x="590" y="315" text-anchor="middle" fill="#0d9488">no daemon</text>
-    <rect x="666" y="292" width="162" height="36" rx="18" fill="#ffffff" stroke="#cbd5e1"/><text x="747" y="315" text-anchor="middle" fill="#0d9488">0 extra tokens</text>
+    <rect x="666" y="292" width="162" height="36" rx="18" fill="#ffffff" stroke="#cbd5e1"/><text x="747" y="315" text-anchor="middle" fill="#0d9488">0 model calls</text>
     <rect x="840" y="292" width="112" height="36" rx="18" fill="#ffffff" stroke="#cbd5e1"/><text x="896" y="315" text-anchor="middle" fill="#0d9488">any stack</text>
   </g>
   <g transform="translate(980 90)">
