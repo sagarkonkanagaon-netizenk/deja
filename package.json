@@ -24,6 +24,7 @@
     "test": "node --no-warnings --test test/*.test.mjs",
     "bench": "node --no-warnings bench/bench.mjs",
     "tokens": "node --no-warnings bench/tokens.mjs",
+    "check": "node --no-warnings scripts/check-standards.mjs",
     "typecheck": "tsc -p jsconfig.json"
   },
   "keywords": [

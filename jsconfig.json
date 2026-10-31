@@ -12,5 +12,5 @@
     "types": ["node"],
     "skipLibCheck": true
   },
-  "include": ["bin/**/*.mjs", "src/**/*.mjs", "bench/**/*.mjs"]
+  "include": ["bin/**/*.mjs", "src/**/*.mjs", "bench/**/*.mjs", "scripts/**/*.mjs"]
 }
