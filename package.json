@@ -1,7 +1,7 @@
 {
   "name": "deja-memory",
   "version": "0.4.0",
-  "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra tokens.",
+  "description": "Memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra model calls.",
   "type": "module",
   "bin": {
     "deja": "bin/deja.mjs"
@@ -23,6 +23,7 @@
   "scripts": {
     "test": "node --no-warnings --test test/*.test.mjs",
     "bench": "node --no-warnings bench/bench.mjs",
+    "tokens": "node --no-warnings bench/tokens.mjs",
     "typecheck": "tsc -p jsconfig.json"
   },
   "keywords": [

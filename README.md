@@ -20,6 +20,7 @@
   <a href="#what-a-session-looks-like"><b>Tour</b></a> ·
   <a href="#works-with-every-stack"><b>Stacks</b></a> ·
   <a href="#how-it-works"><b>How it works</b></a> ·
+  <a href="#efficiency"><b>Efficiency</b></a> ·
   <a href="docs/ARCHITECTURE.md"><b>Architecture</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
@@ -62,8 +63,8 @@ A compact briefing at session start, matching decisions when you ask for somethi
 <tr>
 <td width="50%" valign="top">
 
-### ⚡ Costs nothing to run
-No background worker, no port, no vector database, no Python, no LLM calls of its own. Short-lived Node processes and one SQLite file with full-text search built in.
+### ⚡ Light to run
+No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#efficiency)). Short-lived Node processes and one SQLite file with full-text search built in.
 
 </td>
 <td width="50%" valign="top">
@@ -260,9 +261,41 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 | Works with OpenAI Codex | Yes, one shared memory with Claude Code | Yes |
 | Works with Gemini CLI, OpenCode | Not yet | Yes |
 
-If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs nothing and learns from your failures, use deja.
+If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs no extra model calls and learns from your failures, use deja.
 
-## Performance
+## Efficiency
+
+### Tokens
+
+deja never calls a model, so the only tokens it costs are the text it adds to the agent's context, and it is built to keep that small:
+
+| Technique | What it saves |
+| --- | --- |
+| **No model calls** | Capture, fix learning and summaries are deterministic, so recording a session costs 0 tokens |
+| **Hard budget** | The session briefing stops at `DEJA_CONTEXT_TOKENS` (default 1,500), filled highest-value first |
+| **Index first, details on demand** | `recall` returns one line per memory; the agent calls `get` only for the ones it needs |
+| **Inject once** | Each memory is shown at most once per session (reset after `/compact` or `/clear`) |
+| **Relevance gates** | Prompt notes need real word overlap; fix notes need the same error signature |
+| **Short notes** | Every injected note is one line, about 40 tokens |
+| **Stale memories sink** | Out-of-date memories rank lower and are labelled, so the agent doesn't act on them and redo work |
+| **Off switch** | A `.deja-off` file in a repo, or `DEJA_DISABLE=1`, adds 0 tokens |
+
+Every piece is measured by `npm run tokens` (counts below use `@anthropic-ai/tokenizer`; current Claude models tokenize a little differently, so treat them as close estimates):
+
+| What deja adds | Tokens | When |
+| --- | ---: | --- |
+| MCP tool list and server instructions | 700 | once per session |
+| Session briefing, new project | 40 | session start |
+| Session briefing, typical project | 414 | session start, and after `/compact` or `/clear` |
+| Session briefing, 300 memories | 1,214 | capped by `DEJA_CONTEXT_TOKENS` (default 1,500) |
+| Same, with `DEJA_CONTEXT_TOKENS=500` | 408 | |
+| Related memories for a prompt | ~40 | only when relevant, each memory once per session |
+| Memories about a file being opened | ~40 | only when relevant, each memory once per session |
+| A known fix when an error repeats | ~40 | only when the error has been seen before |
+
+A typical session costs about 1,100 tokens up front and around 40 per useful note after that. One avoided round of re-debugging (reading the error, the files and the logs again, then re-running) usually costs more than that. To spend less, lower `DEJA_CONTEXT_TOKENS`; to spend nothing in a repo, add a `.deja-off` file.
+
+### Speed
 
 `npm run bench` (Node 22, Linux, 5,000 memories, wall time of a fresh process per hook, exactly as Claude Code runs it):
 

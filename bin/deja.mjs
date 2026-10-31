@@ -51,7 +51,7 @@ async function hook(event) {
   }
 }
 
-const HELP = `deja — memory for Claude Code. Zero dependencies, no daemon, no extra tokens.
+const HELP = `deja — memory for Claude Code. Zero dependencies, no daemon, no extra model calls.
 
 Usage: deja <command> [options]
 

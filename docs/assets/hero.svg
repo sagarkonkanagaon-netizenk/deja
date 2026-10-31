@@ -13,5 +13,5 @@
   <text x="58" y="214" fill="#e6edf3">- #41 22d ago: ran `docker compose up -d postgres`; then `npm run</text>
   <text x="58" y="236" fill="#e6edf3">  test:integration` passed. Cause: tests need the compose DB, not RDS.</text>
   <text x="28" y="286" fill="#8b949e">⏺</text><text x="48" y="286" fill="#e6edf3">Same as last time: the Postgres container isn't running. Starting it…</text>
-  <text x="48" y="312" fill="#3fb950">  ✓ fixed in one step · zero extra tokens · no daemon</text>
+  <text x="48" y="312" fill="#3fb950">  ✓ fixed in one step · no extra model calls · no daemon</text>
 </svg>
