@@ -63,7 +63,7 @@ A compact briefing at session start, matching decisions when you ask for somethi
 <td width="50%" valign="top">
 
 ### ⚡ Light to run
-No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#token-cost)). Short-lived Node processes and one SQLite file with full-text search built in.
+No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#token-efficiency)). Short-lived Node processes and one SQLite file with full-text search built in.
 
 </td>
 <td width="50%" valign="top">
@@ -262,9 +262,22 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 
 If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs no extra model calls and learns from your failures, use deja.
 
-## Token cost
+## Token efficiency
 
-deja never calls a model, so the only tokens it costs are the text it adds to the agent's context. Every piece is measured by `npm run tokens` (counts below use `@anthropic-ai/tokenizer`; current Claude models tokenize a little differently, so treat them as close estimates):
+deja never calls a model, so the only tokens it costs are the text it adds to the agent's context, and it is built to keep that small:
+
+| Technique | What it saves |
+| --- | --- |
+| **No model calls** | Capture, fix learning and summaries are deterministic, so recording a session costs 0 tokens |
+| **Hard budget** | The session briefing stops at `DEJA_CONTEXT_TOKENS` (default 1,500), filled highest-value first |
+| **Index first, details on demand** | `recall` returns one line per memory; the agent calls `get` only for the ones it needs |
+| **Inject once** | Each memory is shown at most once per session (reset after `/compact` or `/clear`) |
+| **Relevance gates** | Prompt notes need real word overlap; fix notes need the same error signature |
+| **Short notes** | Every injected note is one line, about 40 tokens |
+| **Stale memories sink** | Out-of-date memories rank lower and are labelled, so the agent doesn't act on them and redo work |
+| **Off switch** | A `.deja-off` file in a repo, or `DEJA_DISABLE=1`, adds 0 tokens |
+
+Every piece is measured by `npm run tokens` (counts below use `@anthropic-ai/tokenizer`; current Claude models tokenize a little differently, so treat them as close estimates):
 
 | What deja adds | Tokens | When |
 | --- | ---: | --- |
