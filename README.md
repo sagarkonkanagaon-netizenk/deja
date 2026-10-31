@@ -20,6 +20,7 @@
   <a href="#what-a-session-looks-like"><b>Tour</b></a> ·
   <a href="#works-with-every-stack"><b>Stacks</b></a> ·
   <a href="#how-it-works"><b>How it works</b></a> ·
+  <a href="#efficiency"><b>Efficiency</b></a> ·
   <a href="docs/ARCHITECTURE.md"><b>Architecture</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
@@ -63,7 +64,7 @@ A compact briefing at session start, matching decisions when you ask for somethi
 <td width="50%" valign="top">
 
 ### ⚡ Light to run
-No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#token-efficiency)). Short-lived Node processes and one SQLite file with full-text search built in.
+No background worker, no port, no vector database, no Python, no LLM calls of its own. It adds about 1,100 tokens to a typical session ([measured](#efficiency)). Short-lived Node processes and one SQLite file with full-text search built in.
 
 </td>
 <td width="50%" valign="top">
@@ -262,7 +263,9 @@ claude-mem is the most popular memory plugin and a great project that pioneered 
 
 If you want semantic search today, use claude-mem. If you want something that cannot break your session, costs no extra model calls and learns from your failures, use deja.
 
-## Token efficiency
+## Efficiency
+
+### Tokens
 
 deja never calls a model, so the only tokens it costs are the text it adds to the agent's context, and it is built to keep that small:
 
@@ -292,7 +295,7 @@ Every piece is measured by `npm run tokens` (counts below use `@anthropic-ai/tok
 
 A typical session costs about 1,100 tokens up front and around 40 per useful note after that. One avoided round of re-debugging (reading the error, the files and the logs again, then re-running) usually costs more than that. To spend less, lower `DEJA_CONTEXT_TOKENS`; to spend nothing in a repo, add a `.deja-off` file.
 
-## Performance
+### Speed
 
 `npm run bench` (Node 22, Linux, 5,000 memories, wall time of a fresh process per hook, exactly as Claude Code runs it):
 
