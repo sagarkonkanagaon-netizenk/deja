@@ -45,7 +45,7 @@
   "repository": "github:sagarkonkanagaon-netizenk/deja",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.10.0",
+    "@types/node": "^26.6.6",
     "typescript": "~7.0.2"
   }
 }
