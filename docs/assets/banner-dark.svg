@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="deja: memory for Claude Code that never debugs the same bug twice. Zero dependencies, no daemon, no extra model calls.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="deja: memory for Claude Code and Codex that never debugs the same bug twice. Zero dependencies, no daemon, no extra model calls.">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0f1f"/><stop offset="1" stop-color="#1b1446"/></linearGradient>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#1f2a44"/></pattern>
@@ -31,7 +31,7 @@
     <path d="M286 126 l38 -28 M286 126 l38 28" stroke="#2dd4bf" stroke-width="30" stroke-linecap="round" fill="none"/>
   </g>
   <text x="340" y="150" class="t" font-size="80" font-weight="800" fill="#e6edf3" letter-spacing="-2">deja</text>
-  <text x="344" y="196" class="t" font-size="26" font-weight="600" fill="#e6edf3">Memory for Claude Code that never</text><text x="344" y="230" class="t" font-size="26" font-weight="600" fill="#e6edf3">debugs the same bug twice.</text>
+  <text x="344" y="196" class="t" font-size="26" font-weight="600" fill="#e6edf3">Memory for Claude Code and Codex that</text><text x="344" y="230" class="t" font-size="26" font-weight="600" fill="#e6edf3">never debugs the same bug twice.</text>
   <text x="344" y="266" class="t" font-size="17" fill="#94a3b8">Recalls past fixes · flags stale memories · learns how your repo runs</text>
   <g class="t" font-size="15" font-weight="600">
     <rect x="344" y="292" width="170" height="36" rx="18" fill="#111827" stroke="#30363d"/><text x="429" y="315" text-anchor="middle" fill="#2dd4bf">0 dependencies</text>
