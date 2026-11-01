@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
-    <img src="docs/assets/banner-dark.svg" width="100%" alt="deja: memory for Claude Code that never debugs the same bug twice">
+    <img src="docs/assets/banner-dark.svg" width="100%" alt="deja: memory for Claude Code and Codex that never debugs the same bug twice">
   </picture>
 </p>
 
