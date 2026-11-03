@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Every MCP tool now declares all four annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`), so hosts can tell which tools only read, which delete, and that none reach the network.
+
 ## 0.4.0
 
 **New: OpenAI Codex support**

@@ -100,8 +100,11 @@ test('MCP server speaks JSON-RPC and its tools work', () => {
   const cwd = repo({ 'm.sql': 'INSERT INTO gold.kpis SELECT * FROM silver.events' });
   process.env.CLAUDE_PROJECT_DIR = cwd;
   assert.equal(handle({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18' } }).result.serverInfo.name, 'deja');
-  const names = handle({ jsonrpc: '2.0', id: 2, method: 'tools/list' }).result.tools.map((t) => t.name);
-  assert.deepEqual(names, ['recall', 'get', 'remember', 'forget', 'lineage', 'scan_lineage']);
+  const tools = handle({ jsonrpc: '2.0', id: 2, method: 'tools/list' }).result.tools;
+  assert.deepEqual(tools.map((t) => t.name), ['recall', 'get', 'remember', 'forget', 'lineage', 'scan_lineage']);
+  for (const t of tools) for (const hint of ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint']) {
+    assert.equal(typeof t.annotations?.[hint], 'boolean', `${t.name} must declare ${hint}`);
+  }
   const call = (name, args) => handle({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name, arguments: args } }).result.content[0].text;
   assert.match(call('remember', { title: 'KPIs are computed in UTC', kind: 'decision', files: ['m.sql'] }), /Saved memory #(\d+)/);
   assert.match(call('recall', { query: 'utc kpis' }), /KPIs are computed in UTC/);
