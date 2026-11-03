@@ -16,6 +16,12 @@
 </p>
 
 <p align="center">
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/sagarkonkanagaon-netizenk-deja-12172e?v=78d7554dfea5cb21e0dadf7d18f548e6)](https://m8ven.ai/mcp/sagarkonkanagaon-netizenk-deja-12172e?s=readme)
+
+</p>
+
+<p align="center">
   <a href="#install"><b>Install</b></a> ·
   <a href="#what-a-session-looks-like"><b>Tour</b></a> ·
   <a href="#works-with-every-stack"><b>Stacks</b></a> ·
