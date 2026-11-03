@@ -42,13 +42,13 @@ const TOOLS = [
         all_projects: { type: 'boolean', default: false, description: 'Search every project on this machine.' },
       },
     },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'get',
     description: 'Fetch full memories by id, including the files they are anchored to and whether those files changed since.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'number' } } }, required: ['ids'] },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'remember',
@@ -64,12 +64,13 @@ const TOOLS = [
       },
       required: ['title'],
     },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'forget',
     description: 'Delete memories by id when they are wrong or no longer apply.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'number' } } }, required: ['ids'] },
-    annotations: { destructiveHint: true },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'lineage',
@@ -83,12 +84,13 @@ const TOOLS = [
       },
       required: ['name'],
     },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'scan_lineage',
     description: 'Index lineage for every SQL, dbt, PySpark, notebook and Airflow file under the project (or a subdirectory). Run once on a data repo; edits keep it current afterwards.',
     inputSchema: { type: 'object', properties: { path: { type: 'string' } } },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 ];
 
